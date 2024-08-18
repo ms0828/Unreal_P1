@@ -21,7 +21,7 @@ public:
 	uint32 bUseControllerRotationYaw : 1;
 
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
-	uint32 bOrientRotationTMovement : 1;
+	uint32 bOrientRotationToMovement : 1;
 
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
 	uint32 bUseControllerDesiredRotation : 1;

@@ -18,12 +18,6 @@ AP1PlayerController::AP1PlayerController(const FObjectInitializer& ObjectInitial
 	{
 		InputMappingContext = DefaultIMCRef.Object;
 	}
-
-	static ConstructorHelpers::FObjectFinder<UP1CharacterControlData> ShoulderDataRef(TEXT("/Script/P1.P1CharacterControlData'/Game/Data/Input/DA_ShoulderView.DA_ShoulderView'"));
-	if (ShoulderDataRef.Object)
-	{
-		CharacterControlManager.Add(ECharacterControlType::Shoulder, ShoulderDataRef.Object);
-	}
 }
 
 void AP1PlayerController::BeginPlay()
@@ -47,32 +41,6 @@ void AP1PlayerController::OnPossess(APawn* InPawn)
 	}
 }
 
-void AP1PlayerController::SetCharacterControlData(const UP1CharacterControlData* CharacterControlData)
-{
-	if (PossessedPawn == nullptr)
-		return;
-
-	PossessedPawn->bUseControllerRotationYaw = CharacterControlData->bUseControllerRotationYaw;
-
-	AP1Player* MyPlayer = Cast<AP1Player>(PossessedPawn);
-	if (MyPlayer)
-	{
-		//CharacterMovement
-		MyPlayer->GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationTMovement;
-		MyPlayer->GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
-		MyPlayer->GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
-		
-		//Player Component
-		MyPlayer->GetCameraBoom()->TargetArmLength = CharacterControlData->TargetArmLength;
-		MyPlayer->GetCameraBoom()->SetRelativeRotation(CharacterControlData->RelativeRotation);
-		MyPlayer->GetCameraBoom()->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;
-		MyPlayer->GetCameraBoom()->bInheritPitch = CharacterControlData->bInheritPitch;
-		MyPlayer->GetCameraBoom()->bInheritYaw = CharacterControlData->bInheritYaw;
-		MyPlayer->GetCameraBoom()->bInheritRoll = CharacterControlData->bInheritRoll;
-		MyPlayer->GetCameraBoom()->bDoCollisionTest = CharacterControlData->bDoCollisionTest;
-	}
-	
-}
 
 void AP1PlayerController::SetupInputComponent()
 {
@@ -83,11 +51,7 @@ void AP1PlayerController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
 		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
-		EnhancedInputComponent->BindAction(ChangeViewPointAction, ETriggerEvent::Triggered, this, &ThisClass::Input_ChangeViewPointStart);
-		EnhancedInputComponent->BindAction(ChangeViewPointAction, ETriggerEvent::Completed, this, &ThisClass::Input_ChangeViewPointEnd);
 	}
-
-	SetCharacterControlData(CharacterControlManager[ECharacterControlType::Shoulder]);
 }
 
 void AP1PlayerController::Input_Move(const FInputActionValue& InputValue)
@@ -105,22 +69,7 @@ void AP1PlayerController::Input_Move(const FInputActionValue& InputValue)
 
 void AP1PlayerController::Input_Turn(const FInputActionValue& InputValue)
 {
-	if (IsChangeView)
-	{
-		FVector2D LookAxisVector = InputValue.Get<FVector2D>();
-		PossessedPawn->AddControllerYawInput(LookAxisVector.X);
-		PossessedPawn->AddControllerPitchInput(LookAxisVector.Y);
-	}
-}
-
-void AP1PlayerController::Input_ChangeViewPointStart(const FInputActionValue& InputValue)
-{
-	IsChangeView = true;
-	UE_LOG(LogTemp, Log, TEXT("Start"));
-}
-
-void AP1PlayerController::Input_ChangeViewPointEnd(const FInputActionValue& InputValue)
-{
-	IsChangeView = false;
-	UE_LOG(LogTemp, Log, TEXT("End"));
+	FVector2D LookAxisVector = InputValue.Get<FVector2D>();
+	PossessedPawn->AddControllerYawInput(LookAxisVector.X * 0.8f);
+	PossessedPawn->AddControllerPitchInput(LookAxisVector.Y * 0.8f);
 }

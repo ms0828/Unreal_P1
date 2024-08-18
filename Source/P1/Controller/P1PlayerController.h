@@ -27,13 +27,12 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void OnPossess(APawn* InPawn) override;
-	void SetCharacterControlData(const class UP1CharacterControlData* CharacterControlData);
+	//void SetCharacterControlData(const class UP1CharacterControlData* CharacterControlData);
 
 private:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Turn(const FInputActionValue& InputValue);
-	void Input_ChangeViewPointStart(const FInputActionValue& InputValue);
-	void Input_ChangeViewPointEnd(const FInputActionValue& InputValue);
+
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -55,5 +54,5 @@ protected:
 	TMap<ECharacterControlType, class UP1CharacterControlData*> CharacterControlManager;
 
 private:
-	bool IsChangeView;
+
 };
