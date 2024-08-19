@@ -25,4 +25,27 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> ComboAttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attackm, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UP1ComboAttackData> ComboAttackData;
+
+	const float AttackSpeedRate = 1.2f;
+
+	int32 CurrentCombo = 0;		//'0' means combo do not start 
+	FTimerHandle ComboTimerHandle;
+	bool HasNextComboAttack = false;
+
+protected:
+	void ComboAttackBegin();
+	void ComboAttackEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
+	void SetComboCheckTimer();
+	void ComboCheck();
+public:
+	void ProcessComboAttack();
+
+
+
 };

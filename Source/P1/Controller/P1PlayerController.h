@@ -32,6 +32,8 @@ protected:
 private:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Turn(const FInputActionValue& InputValue);
+	void Input_Attack(const FInputActionValue& InputValue);
+
 
 
 protected:
@@ -45,7 +47,10 @@ protected:
 	TObjectPtr<class UInputAction> TurnAction;
 
 	UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputAction> ChangeViewPointAction;
+	TObjectPtr<class UInputAction> JumpAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputAction> AttackAction;
 
 	UPROPERTY()
 	TObjectPtr<class APawn> PossessedPawn;

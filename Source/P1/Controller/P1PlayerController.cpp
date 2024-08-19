@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "Data/P1CharacterControlData.h"
 #include "InputMappingContext.h"
+#include "Character/P1Player.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/P1Player.h"
 #include "Camera/CameraComponent.h"
@@ -46,11 +47,18 @@ void AP1PlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	PossessedPawn = GetPawn();
-
+	
 	if (auto* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
 		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
+		if (AP1Player* MyPlayer = Cast<AP1Player>(PossessedPawn))
+		{
+			EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::Jump);
+			EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::StopJumping);
+			EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::ProcessComboAttack);
+
+		}
 	}
 }
 
