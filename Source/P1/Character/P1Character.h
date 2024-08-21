@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interface/P1AttackAnimationInterface.h"
 #include "P1Character.generated.h"
 
 UCLASS()
-class P1_API AP1Character : public ACharacter
+class P1_API AP1Character : public ACharacter, public IP1AttackAnimationInterface
 {
 	GENERATED_BODY()
 
@@ -26,4 +27,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+protected:
+	virtual void AttackHitCheck() override;
 };

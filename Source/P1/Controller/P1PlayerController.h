@@ -30,10 +30,7 @@ protected:
 	//void SetCharacterControlData(const class UP1CharacterControlData* CharacterControlData);
 
 private:
-	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Turn(const FInputActionValue& InputValue);
-	void Input_Attack(const FInputActionValue& InputValue);
-
 
 
 protected:
@@ -52,12 +49,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<class UInputAction> AttackAction;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputAction> RollingAction;
+
 	UPROPERTY()
 	TObjectPtr<class APawn> PossessedPawn;
 
 	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
 	TMap<ECharacterControlType, class UP1CharacterControlData*> CharacterControlManager;
 
-private:
 
 };

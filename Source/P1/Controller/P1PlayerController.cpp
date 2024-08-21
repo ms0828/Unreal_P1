@@ -50,29 +50,15 @@ void AP1PlayerController::SetupInputComponent()
 	
 	if (auto* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
 		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
 		if (AP1Player* MyPlayer = Cast<AP1Player>(PossessedPawn))
 		{
-			EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::Jump);
-			EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::StopJumping);
+			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::Input_Move);
+			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::Released_Move);
 			EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::ProcessComboAttack);
-
+			EnhancedInputComponent->BindAction(RollingAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::ProcessRolling);
 		}
 	}
-}
-
-void AP1PlayerController::Input_Move(const FInputActionValue& InputValue)
-{
-	FVector2D MovementVector = InputValue.Get<FVector2D>();
-	const FRotator Rotation = GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	PossessedPawn->AddMovementInput(ForwardDirection, MovementVector.X);
-	PossessedPawn->AddMovementInput(RightDirection, MovementVector.Y);
 }
 
 void AP1PlayerController::Input_Turn(const FInputActionValue& InputValue)
