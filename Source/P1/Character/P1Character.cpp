@@ -2,8 +2,8 @@
 
 
 #include "Character/P1Character.h"
+#include "GameplayTagContainer.h"
 #include "Components/CapsuleComponent.h"
-#include "Physics/P1Collision.h"
 
 // Sets default values
 AP1Character::AP1Character()
@@ -34,23 +34,17 @@ void AP1Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 }
 
-void AP1Character::AttackHitCheck()
+void AP1Character::OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker)
 {
-	FHitResult OutHitResult;
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
+}
 
-	const float AttackRange = 40.0f;
-	const float AttackRadius = 50.0f;
-	const float AttackDamage = 30.0f;
-	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
-	const FVector End = Start + GetActorForwardVector() * AttackRange;
+void AP1Character::OnDead(TObjectPtr<AP1Character> Attacker)
+{
+}
 
-	bool HitDetected = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, CCHANNEL_P1ACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
-	if (HitDetected)
-	{
-
-	}
-
+void AP1Character::HandleGameplayEvent(FGameplayTag EventTag)
+{
 
 }
+
 

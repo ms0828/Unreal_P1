@@ -5,6 +5,9 @@
 #include "Controller/P1PlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "Data/P1ComboAttackData.h"
+#include "P1Define.h"
+#include "Physics/P1Collision.h"
+#include "Physics/P1Collision.h"
 #include "Animation/AnimMontage.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
@@ -19,11 +22,13 @@ AP1Player::AP1Player()
 		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
 	}
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstaceClassRef(TEXT("/Script/Engine.AnimBlueprint'/Game/Animation/ABP_Player.ABP_Player_C'"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstaceClassRef(TEXT("/Script/Engine.AnimBlueprint'/Game/Animation/Player/ABP_Player.ABP_Player_C'"));
 	if (AnimInstaceClassRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstaceClassRef.Class);
 	}
+
+	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_P1CAPSULE);
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -53,9 +58,60 @@ USpringArmComponent* AP1Player::GetCameraBoom() const
 	return CameraBoom;
 }
 
+
+void AP1Player::OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker)
+{
+	Hp = FMath::Clamp(Hp - Damage, 0, MaxHp);
+	if (Hp == 0)
+	{
+		OnDead(Attacker);
+	}
+}
+
+void AP1Player::OnDead(TObjectPtr<AP1Character> Attacker)
+{
+	if (State == EPlayerState::Dead)
+	{
+		return;
+	}
+	State = EPlayerState::Dead;
+}
+
+void AP1Player::AttackHitCheck()
+{
+	TArray<FHitResult> OutHitResults;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
+
+	const float AttackRange = 100.0f;
+	const float AttackRadius = 150.0f;
+	const float AttackDamage = 30.0f;
+	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const FVector End = Start + GetActorForwardVector() * AttackRange;
+
+	bool HitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_P1ACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
+	if (HitDetected)
+	{
+		for (FHitResult HitResult : OutHitResults)
+		{
+			if (AP1Character* HitCharacter = Cast<AP1Character>(HitResult.GetActor()) )
+			{
+				HitCharacter->OnDamaged(FinalDamage, this);
+			}
+		}
+	}
+
+
+#if ENABLE_DRAW_DEBUG
+		FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+		float CapsuleHalfHeight = AttackRange * 0.5f;
+		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+		DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 0.5f);
+#endif
+}
+
 void AP1Player::Input_Move(const FInputActionValue& InputValue)
 {
-	if (isRolling)
+	if (GetPlayerState() == EPlayerState::Rolling)
 	{
 		return;
 	}
@@ -77,13 +133,15 @@ void AP1Player::Released_Move(const FInputActionValue& InputValue)
 	CurrentMoveInputDirection = FVector2D::ZeroVector;
 }
 
+
+
 void AP1Player::ProcessComboAttack()
 {
 	if (GetCharacterMovement()->IsFalling())
 	{
 		return;
 	}
-	if (isRolling)
+	if (GetPlayerState() == EPlayerState::Rolling)
 	{
 		return;
 	}
@@ -175,7 +233,7 @@ void AP1Player::ProcessRolling()
 	{
 		return;
 	}
-	if (isRolling)
+	if (GetPlayerState() == EPlayerState::Rolling)
 	{
 		return;
 	}
@@ -206,7 +264,7 @@ void AP1Player::ProcessRolling()
 
 void AP1Player::RollingBegin(FVector Direction)
 {
-	isRolling = true;
+	SetPlayerState(EPlayerState::Rolling);
 	CurrentCombo = 0;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -217,15 +275,6 @@ void AP1Player::RollingBegin(FVector Direction)
 	AnimInstance->Montage_Play(RollingMontage, RollingSpeedRate);
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 
-
-	//float RollDistance = 1000.0f; // 구르기 동안 이동할 거리
-	//float RollDuration = RollingMontage->GetPlayLength(); // 몽타주의 재생 시간
-	//FVector RollVelocity = Direction * RollDistance / RollDuration; // 속도 계산
-	//LaunchCharacter(RollVelocity, true, true); // 캐릭터를 해당 방향으로 발사
-
-	//FVector RollImpulse = Direction * RollDistance;
-	//GetCharacterMovement()->AddImpulse(RollImpulse, true);
-
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AP1Player::RollingEnd);
 	AnimInstance->Montage_SetEndDelegate(EndDelegate, RollingMontage);
@@ -234,6 +283,16 @@ void AP1Player::RollingBegin(FVector Direction)
 void AP1Player::RollingEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 {
 	CurrentCombo = 0;
-	isRolling = false;
+	SetPlayerState(EPlayerState::None);
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+}
+
+EPlayerState AP1Player::GetPlayerState()
+{
+	return State;
+}
+
+void AP1Player::SetPlayerState(EPlayerState InState)
+{
+	this->State = InState;
 }

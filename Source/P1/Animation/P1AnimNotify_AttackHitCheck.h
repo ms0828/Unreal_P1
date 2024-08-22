@@ -6,9 +6,7 @@
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "P1AnimNotify_AttackHitCheck.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class P1_API UP1AnimNotify_AttackHitCheck : public UAnimNotify
 {

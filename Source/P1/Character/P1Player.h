@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Character/P1Character.h"
+#include "P1Define.h"
+#include "Interface/P1AttackAnimationInterface.h"
 #include "P1Player.generated.h"
 
 class USpringArmComponent;
@@ -12,7 +14,7 @@ struct FInputActionValue;
 class AP1PlayerController;
 
 UCLASS()
-class P1_API AP1Player : public AP1Character
+class P1_API AP1Player : public AP1Character, public IP1AttackAnimationInterface
 {
 	GENERATED_BODY()
 	
@@ -20,6 +22,25 @@ public:
 	AP1Player();
 
 	USpringArmComponent* GetCameraBoom() const;
+
+
+protected:
+	void ComboAttackBegin();
+	void ComboAttackEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
+	void SetComboCheckTimer();
+	void ComboCheck();
+	void RollingBegin(FVector Direction);
+	void RollingEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
+	virtual void AttackHitCheck() override;
+public:
+	void ProcessComboAttack();
+	void ProcessRolling();
+	void Input_Move(const FInputActionValue& InputValue);
+	void Released_Move(const FInputActionValue& InputValue);
+	EPlayerState GetPlayerState();
+	void SetPlayerState(EPlayerState InState);
+	virtual void OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker) override;
+	virtual void OnDead(TObjectPtr<AP1Character> Attacker) override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
@@ -42,20 +63,12 @@ protected:
 	int32 CurrentCombo = 0;		//'0' means combo do not start 
 	FTimerHandle ComboTimerHandle;
 	bool HasNextComboAttack = false;
-	bool isRolling = false;
+
+
 	AP1PlayerController* PlayerController;
 	FVector2D CurrentMoveInputDirection;
 
-protected:
-	void ComboAttackBegin();
-	void ComboAttackEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
-	void SetComboCheckTimer();
-	void ComboCheck();
-	void RollingBegin(FVector Direction);
-	void RollingEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
-public:
-	void ProcessComboAttack();
-	void ProcessRolling();
-	void Input_Move(const FInputActionValue& InputValue);
-	void Released_Move(const FInputActionValue& InputValue);
+	UPROPERTY(BlueprintReadWrite)
+	EPlayerState State = EPlayerState::None;
+
 };
