@@ -22,6 +22,7 @@ enum class EEnemyState : uint8
 	Attack,
 	Skill,
 	Dead,
+	StandByAttack,
 };
 
 #define D(x) if(GEngine) { GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan, x); }

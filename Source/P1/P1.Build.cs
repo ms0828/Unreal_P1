@@ -17,6 +17,10 @@ public class P1 : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
 			"GameplayTags",
+			"UMG",
+			"NavigationSystem",
+			"AIModule",
+			"GameplayTasks",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

@@ -20,6 +20,7 @@ void AP1Character::BeginPlay()
 	
 }
 
+
 // Called every frame
 void AP1Character::Tick(float DeltaTime)
 {
@@ -46,5 +47,10 @@ void AP1Character::HandleGameplayEvent(FGameplayTag EventTag)
 {
 
 }
+void AP1Character::EnableRagdoll()
+{
+}
 
-
+void AP1Character::Disappear()
+{
+}

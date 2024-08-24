@@ -18,17 +18,22 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker);
 	virtual void OnDead(TObjectPtr<AP1Character> Attacker);
 	virtual void HandleGameplayEvent(struct FGameplayTag EventTag);
-
+	virtual void EnableRagdoll();
+	virtual void Disappear();
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> HitReactionMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimSequence> DeadAnimSequence;
+
+	FTimerHandle DeadAnimationTimerHandle;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -38,5 +43,5 @@ public:
 	int32 MaxHp = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 FinalDamage = 10;
+	int32 FinalDamage = 20;
 };

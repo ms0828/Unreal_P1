@@ -26,4 +26,6 @@ public:
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	EEnemyState State = EEnemyState::None;
+
+
 };
