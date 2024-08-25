@@ -17,6 +17,9 @@ public:
 
 	void RunAI();
 	void StopAI();
+	TObjectPtr<class UBlackboardComponent> GetBlackboard();
+	void SetWaitingAttackMode(bool InValue);
+	void SetStrafePlayerMode(bool InValue);
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;

@@ -5,6 +5,8 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Animation/P1CommonMonsterAnimInstance.h"
+#include "GameFramework/Character.h"
 #include "AI/P1AI.h"
 
 AP1CommonMonsterAIController::AP1CommonMonsterAIController()
@@ -40,6 +42,27 @@ void AP1CommonMonsterAIController::StopAI()
 	{
 		BTComponent->StopTree();
 	}
+}
+
+TObjectPtr<class UBlackboardComponent> AP1CommonMonsterAIController::GetBlackboard()
+{
+	return Blackboard.Get();
+}
+
+void AP1CommonMonsterAIController::SetWaitingAttackMode(bool InValue)
+{
+	Blackboard->SetValueAsBool(BBKEY_ISWAITINGATTACK, InValue);
+}
+
+void AP1CommonMonsterAIController::SetStrafePlayerMode(bool InValue)
+{
+	ACharacter* Monster = Cast<ACharacter>(GetPawn());
+	if (Monster == nullptr)
+	{
+		return;
+	}
+	UP1CommonMonsterAnimInstance* MonsterAnimInstance = Cast<UP1CommonMonsterAnimInstance>(Monster->GetMesh()->GetAnimInstance());
+	MonsterAnimInstance->SetStrafePlayerMode(InValue);
 }
 
 void AP1CommonMonsterAIController::OnPossess(APawn* InPawn)

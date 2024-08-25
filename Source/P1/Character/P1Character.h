@@ -31,7 +31,7 @@ protected:
 	TObjectPtr<class UAnimMontage> HitReactionMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
-	TObjectPtr<class UAnimSequence> DeadAnimSequence;
+	TObjectPtr<class UAnimMontage> DeadAnimMontage;
 
 	FTimerHandle DeadAnimationTimerHandle;
 

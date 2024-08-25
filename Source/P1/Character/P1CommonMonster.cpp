@@ -77,19 +77,18 @@ void AP1CommonMonster::OnDead(TObjectPtr<AP1Character> Attacker)
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
     AnimInstance->StopAllMontages(0.0f);
-    GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
-
-    if (DeadAnimSequence)
+    
+    if (DeadAnimMontage)
     {
-        GetMesh()->PlayAnimation(DeadAnimSequence, false);
+        AnimInstance->Montage_Play(DeadAnimMontage, 1.0f);
         DeadAnimationTimerHandle.Invalidate();
-        GetWorld()->GetTimerManager().SetTimer(DeadAnimationTimerHandle, this, &AP1CommonMonster::Disappear, DeadAnimSequence->GetPlayLength(), false);
+        GetWorld()->GetTimerManager().SetTimer(DeadAnimationTimerHandle, this, &AP1CommonMonster::Disappear, DeadAnimMontage->GetPlayLength() * 0.7f, false);
     }
 }
 
 void AP1CommonMonster::Disappear()
 {
-    SetLifeSpan(1.0f);
+    SetLifeSpan(0.1f);
 }
 
 float AP1CommonMonster::GetAIPatrolRadius()
@@ -114,14 +113,14 @@ float AP1CommonMonster::GetAITurnSpeed()
 
 void AP1CommonMonster::AttackByAI()
 {
-    if (State == EEnemyState::StandByAttack)
+    if (State == EEnemyState::WatingAttack || State == EEnemyState::Dead)
     {
         return;
     }
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
     AnimInstance->Montage_Play(AttackMontage, 1.0f);
-    State = EEnemyState::StandByAttack;
+    State = EEnemyState::WatingAttack;
     GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 
     AttackCoolTimerHandle.Invalidate();
@@ -131,14 +130,37 @@ void AP1CommonMonster::AttackByAI()
     GetWorld()->GetTimerManager().SetTimer(AttackFinishedHandle, this, &AP1CommonMonster::AttackFinished, AttackMontage->GetPlayLength(), false);
 }
 
+TObjectPtr<UAnimMontage> AP1CommonMonster::GetPatrollingMontage()
+{
+    if (PatrollingMontage == nullptr)
+    {
+        return nullptr;
+    }
+    return PatrollingMontage;
+}
+
+TObjectPtr<UAnimMontage> AP1CommonMonster::GetHowlingMontage()
+{
+    if (HowlingMontage == nullptr)
+    {
+        return nullptr;
+    }
+    return HowlingMontage;
+}
+
+
 void AP1CommonMonster::AttackCoolTimeInit()
 {
     State = EEnemyState::None;
+    AP1CommonMonsterAIController* AIController = Cast<AP1CommonMonsterAIController>(GetController());
+    AIController->SetWaitingAttackMode(false);
 }
 
 void AP1CommonMonster::AttackFinished()
 {
     GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+    AP1CommonMonsterAIController* AIController = Cast<AP1CommonMonsterAIController>(GetController());
+    AIController->SetWaitingAttackMode(true);
 }
 
 

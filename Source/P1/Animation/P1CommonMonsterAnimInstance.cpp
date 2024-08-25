@@ -8,6 +8,7 @@
 UP1CommonMonsterAnimInstance::UP1CommonMonsterAnimInstance()
 {
 	MovingThreshold = 3.0f;
+	bIsStrafePlayer = false;
 }
 
 void UP1CommonMonsterAnimInstance::NativeInitializeAnimation()
@@ -32,4 +33,9 @@ void UP1CommonMonsterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsIdle = GroundSpeed < MovingThreshold;
 		bIsFalling = Movement->IsFalling();
 	}
+}
+
+void UP1CommonMonsterAnimInstance::SetStrafePlayerMode(bool InValue)
+{
+	bIsStrafePlayer = InValue;
 }

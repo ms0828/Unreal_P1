@@ -48,4 +48,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 bIsFalling : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 bIsStrafePlayer : 1;
+
+
+public:
+	void SetStrafePlayerMode(bool InValue);
 };

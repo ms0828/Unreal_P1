@@ -19,10 +19,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> AttackMontage;
 
-	float AttackCoolTime = 5.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> PatrollingMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> HowlingMontage;
+
+	float AttackCoolTime = 7.0f;
 	FTimerHandle AttackCoolTimerHandle;
 	FTimerHandle AttackFinishedHandle;
+
 
 public:
 	virtual void OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker) override;
@@ -30,13 +36,16 @@ public:
 	virtual void EnableRagdoll() override;
 	virtual void Disappear() override;
 
-protected:
+public:
 	virtual float GetAIPatrolRadius() override;
 	virtual float GetAIDetectRange() override;
 	virtual float GetAIAttackRange() override;
 	virtual float GetAITurnSpeed() override;
-
 	virtual void AttackByAI() override;
+
+	TObjectPtr<UAnimMontage> GetPatrollingMontage();
+	TObjectPtr<UAnimMontage> GetHowlingMontage();
+
 	void AttackCoolTimeInit();
 	void AttackFinished();
 };
