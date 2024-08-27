@@ -22,7 +22,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker);
-	virtual void OnDead(TObjectPtr<AP1Character> Attacker);
+	virtual void OnDead();
 	virtual void HandleGameplayEvent(struct FGameplayTag EventTag);
 	virtual void EnableRagdoll();
 	virtual void Disappear();
@@ -34,6 +34,12 @@ protected:
 	TObjectPtr<class UAnimMontage> DeadAnimMontage;
 
 	FTimerHandle DeadAnimationTimerHandle;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UP1CharacterStatComponent> Stat;
+
+
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

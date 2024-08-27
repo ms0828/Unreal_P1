@@ -13,6 +13,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "UI/P1PlayerHpBarWidget.h"
+#include "CharacterStat/P1CharacterStatComponent.h"
 
 AP1Player::AP1Player()
 {
@@ -51,6 +53,41 @@ AP1Player::AP1Player()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
+
+	// --- UI ---
+	static ConstructorHelpers::FClassFinder<UP1PlayerHpBarWidget> HpBarWidgetRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_PlayerHpBar.WBP_PlayerHpBar_C'"));
+	if (HpBarWidgetRef.Succeeded())
+	{
+		HpBarWidgetClass = HpBarWidgetRef.Class;
+	}
+}
+
+
+void AP1Player::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (HpBarWidgetClass)
+	{
+		HpBarWidget = CreateWidget<UP1PlayerHpBarWidget>(GetWorld(), HpBarWidgetClass);
+		if (HpBarWidget)
+		{
+			HpBarWidget->SetOwningPlayer(this);
+			SetupPlayerHpBarWidget();
+			HpBarWidget->AddToViewport();
+			HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
+		}
+	}
+}
+
+void AP1Player::SetupPlayerHpBarWidget()
+{
+	if (HpBarWidget)
+	{
+		HpBarWidget->SetMaxHp(Stat->GetMaxHp());
+		Stat->OnHpChanged.AddUObject(HpBarWidget, &UP1PlayerHpBarWidget::UpdateHpBar);
+		Stat->OnHpZero.AddUObject(this, &AP1Player::OnDead);
+	}
 }
 
 USpringArmComponent* AP1Player::GetCameraBoom() const
@@ -61,14 +98,51 @@ USpringArmComponent* AP1Player::GetCameraBoom() const
 
 void AP1Player::OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker)
 {
-	Hp = FMath::Clamp(Hp - Damage, 0, MaxHp);
-	if (Hp == 0)
+	Stat->ApplyDamage(Damage);
+	if (Stat->GetCurrentHp() == 0)
 	{
-		OnDead(Attacker);
+		OnDead();
 	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (HitReactionMontage)
+	{
+		// Convert Yaw -> -180 to 180
+		float CharacterYaw = FMath::UnwindDegrees(GetActorRotation().Yaw);
+		float AttackerYaw = FMath::UnwindDegrees(Attacker->GetActorRotation().Yaw);
+		float YawDifference = AttackerYaw - CharacterYaw;
+
+		// Normalize yaw difference
+		if (YawDifference > 180.0f) YawDifference -= 360.0f;
+		if (YawDifference < -180.0f) YawDifference += 360.0f;
+
+		FName SectionName;
+
+
+		if (YawDifference > -45.0f && YawDifference < 45.0f)
+		{
+			SectionName = TEXT("Back");
+		}
+		else if (YawDifference > 135.0f || YawDifference < -135.0f)
+		{
+			SectionName = TEXT("Front");
+		}
+		else if (YawDifference > 45.0f && YawDifference < 135.0f)
+		{
+			SectionName = TEXT("Left");
+		}
+		else
+		{
+			SectionName = TEXT("Right");
+		}
+
+		AnimInstance->Montage_Play(HitReactionMontage, 1.0f);
+		AnimInstance->Montage_JumpToSection(SectionName, HitReactionMontage);
+	}
+
 }
 
-void AP1Player::OnDead(TObjectPtr<AP1Character> Attacker)
+void AP1Player::OnDead()
 {
 	if (State == EPlayerState::Dead)
 	{
@@ -84,7 +158,7 @@ void AP1Player::AttackHitCheck()
 
 	const float AttackRange = 100.0f;
 	const float AttackRadius = 150.0f;
-	const float AttackDamage = 30.0f;
+	const float AttackDamage = Stat->GetAttackDamage();
 	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 	const FVector End = Start + GetActorForwardVector() * AttackRange;
 
@@ -108,6 +182,7 @@ void AP1Player::AttackHitCheck()
 		DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 0.5f);
 #endif
 }
+
 
 void AP1Player::Input_Move(const FInputActionValue& InputValue)
 {
@@ -170,6 +245,7 @@ void AP1Player::ProcessComboAttack()
 		HasNextComboAttack = true;
 	}
 }
+
 
 void AP1Player::ComboAttackBegin()
 {

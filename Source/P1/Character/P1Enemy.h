@@ -21,7 +21,7 @@ public:
 	EEnemyState GetEnemyState();
 	void SetEnemyState(EEnemyState InState);
 	virtual void OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker) override;
-	virtual void OnDead(TObjectPtr<AP1Character> Attacker) override;
+	virtual void OnDead() override;
 
 protected:
 	UPROPERTY(BlueprintReadWrite)

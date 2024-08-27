@@ -25,6 +25,7 @@ public:
 
 
 protected:
+	virtual void BeginPlay() override;
 	void ComboAttackBegin();
 	void ComboAttackEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
 	void SetComboCheckTimer();
@@ -32,6 +33,10 @@ protected:
 	void RollingBegin(FVector Direction);
 	void RollingEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
 	virtual void AttackHitCheck() override;
+
+	// ---ui
+	void SetupPlayerHpBarWidget();
+
 public:
 	void ProcessComboAttack();
 	void ProcessRolling();
@@ -40,7 +45,7 @@ public:
 	EPlayerState GetPlayerState();
 	void SetPlayerState(EPlayerState InState);
 	virtual void OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker) override;
-	virtual void OnDead(TObjectPtr<AP1Character> Attacker) override;
+	virtual void OnDead() override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
@@ -71,4 +76,12 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	EPlayerState State = EPlayerState::None;
 
+
+	//----UI
+
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	TSubclassOf<class UP1PlayerHpBarWidget> HpBarWidgetClass;
+
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	TObjectPtr<class UP1PlayerHpBarWidget> HpBarWidget;
 };

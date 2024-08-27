@@ -18,7 +18,7 @@ void AP1Enemy::OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker)
 
 }
 
-void AP1Enemy::OnDead(TObjectPtr<AP1Character> Attacker)
+void AP1Enemy::OnDead()
 {
 
 }

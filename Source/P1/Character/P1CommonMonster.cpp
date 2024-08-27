@@ -7,10 +7,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AI/P1CommonMonsterAIController.h"
 #include "Components/CapsuleComponent.h"
+#include "Character/P1Player.h"
 
 AP1CommonMonster::AP1CommonMonster()
 {
-	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_P1CAPSULE);
     AIControllerClass = AP1CommonMonsterAIController::StaticClass();
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
@@ -21,7 +21,7 @@ void AP1CommonMonster::OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker
 	Hp = FMath::Clamp(Hp - Damage, 0, MaxHp);
 	if (Hp == 0)
 	{
-		OnDead(Attacker);
+		OnDead();
         return;
 	}
 
@@ -64,7 +64,7 @@ void AP1CommonMonster::OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker
 	D(FString::Printf(TEXT("%d"), Hp));
 }
 
-void AP1CommonMonster::OnDead(TObjectPtr<AP1Character> Attacker)
+void AP1CommonMonster::OnDead()
 {
 	if (State == EEnemyState::Dead)
 	{
@@ -128,6 +128,30 @@ void AP1CommonMonster::AttackByAI()
 
     AttackFinishedHandle.Invalidate();
     GetWorld()->GetTimerManager().SetTimer(AttackFinishedHandle, this, &AP1CommonMonster::AttackFinished, AttackMontage->GetPlayLength(), false);
+}
+
+void AP1CommonMonster::AttackHitCheck()
+{
+    TArray<FHitResult> OutHitResults;
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
+
+    const float AttackRange = 70.0f;
+    const float AttackRadius = 70.0f;
+    const float AttackDamage = 10.0f;
+    const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+    const FVector End = Start + GetActorForwardVector() * AttackRange;
+
+    bool HitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_P1ACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
+    if (HitDetected)
+    {
+        for (FHitResult HitResult : OutHitResults)
+        {
+            if (AP1Player* HitCharacter = Cast<AP1Player>(HitResult.GetActor()))
+            {
+                HitCharacter->OnDamaged(FinalDamage, this);
+            }
+        }
+    }
 }
 
 TObjectPtr<UAnimMontage> AP1CommonMonster::GetPatrollingMontage()
