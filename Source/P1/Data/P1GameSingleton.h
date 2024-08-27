@@ -20,8 +20,8 @@ public:
 
 public:
 	FORCEINLINE FP1PlayerStat GetPlayerStat(int32 InLevel) const {
-		return PlayerStatTable.IsValidIndex(InLevel) ? PlayerStatTable
-			[InLevel] : FP1PlayerStat();
+		return PlayerStatTable.IsValidIndex(InLevel - 1) ? PlayerStatTable
+			[InLevel - 1] : FP1PlayerStat();
 	};
 
 	UPROPERTY()

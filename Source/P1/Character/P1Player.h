@@ -34,8 +34,10 @@ protected:
 	void RollingEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
 	virtual void AttackHitCheck() override;
 
+public:
 	// ---ui
 	void SetupPlayerHpBarWidget();
+	void SetupHUDWidget(class UP1HUDWidget* InHUDWidget);
 
 public:
 	void ProcessComboAttack();
@@ -76,12 +78,4 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	EPlayerState State = EPlayerState::None;
 
-
-	//----UI
-
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
-	TSubclassOf<class UP1PlayerHpBarWidget> HpBarWidgetClass;
-
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
-	TObjectPtr<class UP1PlayerHpBarWidget> HpBarWidget;
 };

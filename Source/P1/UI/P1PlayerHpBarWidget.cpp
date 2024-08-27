@@ -25,6 +25,5 @@ void UP1PlayerHpBarWidget::UpdateHpBar(float NewCurrentHp)
 	if (HpProgressBar)
 	{
 		HpProgressBar->SetPercent(NewCurrentHp / MaxHp);
-		UE_LOG(LogTemp, Warning, TEXT("%f"), HpProgressBar->GetPercent());
 	}
 }

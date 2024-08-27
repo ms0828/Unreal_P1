@@ -12,12 +12,19 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "UI/P1HUDWidget.h"
 AP1PlayerController::AP1PlayerController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> DefaultIMCRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Data/Input/IMC_Player.IMC_Player'"));
 	if (DefaultIMCRef.Object)
 	{
 		InputMappingContext = DefaultIMCRef.Object;
+	}
+
+	static ConstructorHelpers::FClassFinder<UP1HUDWidget> HUDWidgetRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_P1HUD.WBP_P1HUD_C'"));
+	if (HUDWidgetRef.Succeeded())
+	{
+		HUDWidgetClass = HUDWidgetRef.Class;
 	}
 }
 
@@ -29,6 +36,16 @@ void AP1PlayerController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(InputMappingContext, 0);
 	}
+
+	if (HUDWidgetClass)
+	{
+		HUDWidget = CreateWidget<UP1HUDWidget>(this, HUDWidgetClass);
+		if (HUDWidget)
+		{
+			HUDWidget->AddToViewport();
+		}
+	}
+
 }
 
 

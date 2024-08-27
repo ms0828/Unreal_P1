@@ -1,19 +1,19 @@
 
 #include "CharacterStat/P1CharacterStatComponent.h"
-
+#include "Data/P1GameSingleton.h"
 
 UP1CharacterStatComponent::UP1CharacterStatComponent()
 {
-	MaxHp = 200.0f;
-	CurrentHp = 200.0f;
-	SetAttackDamage(20.f);
+	CurrentLevel = 1;
+
+	bWantsInitializeComponent = true;
 }
 
-
-void UP1CharacterStatComponent::BeginPlay()
+void UP1CharacterStatComponent::InitializeComponent()
 {
-	Super::BeginPlay();
-	SetHp(CurrentHp);
+	Super::InitializeComponent();
+	SetLevelStat(CurrentLevel);
+	SetHp(BaseStat.MaxHp);
 }
 
 float UP1CharacterStatComponent::ApplyDamage(float InDamage)
@@ -32,14 +32,17 @@ float UP1CharacterStatComponent::ApplyDamage(float InDamage)
 
 void UP1CharacterStatComponent::SetHp(float NewHp)
 {
-	CurrentHp = FMath::Clamp(NewHp, 0.0f, MaxHp);
+	CurrentHp = FMath::Clamp(NewHp, 0.0f, BaseStat.MaxHp);
 	OnHpChanged.Broadcast(CurrentHp);
 }
 
-
-void UP1CharacterStatComponent::SetAttackDamage(float Value)
+void UP1CharacterStatComponent::SetLevelStat(int32 InNewLevel)
 {
-	AttackDamage = Value;
+	CurrentLevel = FMath::Clamp(InNewLevel, 1, UP1GameSingleton::Get().PlayerMaxLevel);
+	SetBaseStat(UP1GameSingleton::Get().GetPlayerStat(CurrentLevel));
+	check(BaseStat.MaxHp > 0.0f);
 }
+
+
 
 

@@ -7,14 +7,14 @@
 #include "Data/P1ComboAttackData.h"
 #include "P1Define.h"
 #include "Physics/P1Collision.h"
-#include "Physics/P1Collision.h"
 #include "Animation/AnimMontage.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "UI/P1PlayerHpBarWidget.h"
 #include "CharacterStat/P1CharacterStatComponent.h"
+#include "UI/P1HUDWidget.h"
+
 
 AP1Player::AP1Player()
 {
@@ -53,13 +53,6 @@ AP1Player::AP1Player()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-
-	// --- UI ---
-	static ConstructorHelpers::FClassFinder<UP1PlayerHpBarWidget> HpBarWidgetRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_PlayerHpBar.WBP_PlayerHpBar_C'"));
-	if (HpBarWidgetRef.Succeeded())
-	{
-		HpBarWidgetClass = HpBarWidgetRef.Class;
-	}
 }
 
 
@@ -67,25 +60,18 @@ void AP1Player::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HpBarWidgetClass)
-	{
-		HpBarWidget = CreateWidget<UP1PlayerHpBarWidget>(GetWorld(), HpBarWidgetClass);
-		if (HpBarWidget)
-		{
-			HpBarWidget->SetOwningPlayer(this);
-			SetupPlayerHpBarWidget();
-			HpBarWidget->AddToViewport();
-			HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
-		}
-	}
 }
 
-void AP1Player::SetupPlayerHpBarWidget()
+
+void AP1Player::SetupHUDWidget(UP1HUDWidget* InHUDWidget)
 {
-	if (HpBarWidget)
+	if (InHUDWidget)
 	{
-		HpBarWidget->SetMaxHp(Stat->GetMaxHp());
-		Stat->OnHpChanged.AddUObject(HpBarWidget, &UP1PlayerHpBarWidget::UpdateHpBar);
+		InHUDWidget->UpdateStat(Stat->GetBaseStat(), Stat->GetModifierStat());
+		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
+
+		Stat->OnStatChanged.AddUObject(InHUDWidget, &UP1HUDWidget::UpdateStat);
+		Stat->OnHpChanged.AddUObject(InHUDWidget, &UP1HUDWidget::UpdateHpBar);
 		Stat->OnHpZero.AddUObject(this, &AP1Player::OnDead);
 	}
 }
@@ -156,9 +142,9 @@ void AP1Player::AttackHitCheck()
 	TArray<FHitResult> OutHitResults;
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
-	const float AttackRange = 100.0f;
+	const float AttackRange = Stat->GetTotalStat().AttackRange;
 	const float AttackRadius = 150.0f;
-	const float AttackDamage = Stat->GetAttackDamage();
+	const float AttackDamage = Stat->GetTotalStat().Attack;
 	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 	const FVector End = Start + GetActorForwardVector() * AttackRange;
 

@@ -59,4 +59,10 @@ protected:
 	TMap<ECharacterControlType, class UP1CharacterControlData*> CharacterControlManager;
 
 
+	// HUD
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
+	TSubclassOf<class UP1HUDWidget> HUDWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = HUD)
+	TObjectPtr<class UP1HUDWidget> HUDWidget;
 };
