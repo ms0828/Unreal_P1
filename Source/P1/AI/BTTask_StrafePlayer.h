@@ -24,6 +24,6 @@ protected:
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 private:
-    void StartStrafeTimer(UBehaviorTreeComponent& OwnerComp, APawn* Monster, APawn* Player, float Radius);
-    void StrafeAroundPlayer(APawn* Monster, APawn* Player, float Radius);
+    void StartStrafeTimer(UBehaviorTreeComponent& OwnerComp, TWeakObjectPtr<APawn> Monster, TWeakObjectPtr<APawn> Player, float Radius);
+    void StrafeAroundPlayer(TWeakObjectPtr<APawn> Monster, TWeakObjectPtr<APawn> Player, float Radius);
 };

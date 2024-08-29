@@ -20,8 +20,8 @@ EBTNodeResult::Type UBTTask_StrafePlayer::ExecuteTask(UBehaviorTreeComponent& Ow
         return EBTNodeResult::Failed;
     }
 
-    APawn* Monster = AIController->GetPawn();
-    if (Monster == nullptr)
+    TWeakObjectPtr<APawn> WeakPtrMonster = AIController->GetPawn();
+    if (!WeakPtrMonster.IsValid())
     {
         return EBTNodeResult::Failed;
     }
@@ -30,30 +30,37 @@ EBTNodeResult::Type UBTTask_StrafePlayer::ExecuteTask(UBehaviorTreeComponent& Ow
 
     UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 
-    APawn* Player = Cast<APawn>(BlackboardComp->GetValueAsObject(BBKEY_TARGET));
-    if (Player == nullptr)
+    TWeakObjectPtr<APawn> WeakPtrPlayer = Cast<APawn>(BlackboardComp->GetValueAsObject(BBKEY_TARGET));
+    if (!WeakPtrPlayer.IsValid())
     {
         return EBTNodeResult::Failed;
     }
 
-    FVector PlayerLocation = Player->GetActorLocation();
-    FVector MonsterLocation = Monster->GetActorLocation();
+    FVector PlayerLocation = WeakPtrPlayer.Get()->GetActorLocation();
+    FVector MonsterLocation = WeakPtrMonster.Get()->GetActorLocation();
     float Radius = 300.0f;
-        //FVector::Dist(PlayerLocation, MonsterLocation);
-    
-    StartStrafeTimer(OwnerComp, Monster, Player, Radius);
+
+    StrafeTimerHandle.Invalidate();
+    FinishTaskTimerHandle.Invalidate();
+    StartStrafeTimer(OwnerComp, WeakPtrMonster, WeakPtrPlayer, Radius);
 
     return EBTNodeResult::InProgress;
 }
 
 
-void UBTTask_StrafePlayer::StartStrafeTimer(UBehaviorTreeComponent& OwnerComp, APawn* Monster, APawn* Player, float Radius)
+void UBTTask_StrafePlayer::StartStrafeTimer(UBehaviorTreeComponent& OwnerComp, TWeakObjectPtr<APawn> Monster, TWeakObjectPtr<APawn> Player, float Radius)
 {
     float TimerInterval = 0.2f; // 일정한 간격
-    StrafeTimerHandle.Invalidate();
-    GetWorld()->GetTimerManager().SetTimer(StrafeTimerHandle, FTimerDelegate::CreateUObject(
-        this, &UBTTask_StrafePlayer::StrafeAroundPlayer, Monster, Player, Radius), TimerInterval, true);
-
+    
+    GetWorld()->GetTimerManager().SetTimer(StrafeTimerHandle, FTimerDelegate::CreateLambda([Monster, Player, this, &OwnerComp, Radius]()
+        {
+            if (!Monster.IsValid() || !Player.IsValid())
+            {
+                FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+                return;
+            }
+            StrafeAroundPlayer(Monster, Player, Radius);
+        }), TimerInterval, true);
 
     float FinishDelay = FMath::FRandRange(2.0f, 3.0f);
     GetWorld()->GetTimerManager().SetTimer(FinishTaskTimerHandle, FTimerDelegate::CreateLambda([this, &OwnerComp]()
@@ -70,9 +77,9 @@ void UBTTask_StrafePlayer::StartStrafeTimer(UBehaviorTreeComponent& OwnerComp, A
 
 
 
-void UBTTask_StrafePlayer::StrafeAroundPlayer(APawn* Monster, APawn* Player, float Radius)
+void UBTTask_StrafePlayer::StrafeAroundPlayer(TWeakObjectPtr<APawn> Monster, TWeakObjectPtr<APawn> Player, float Radius)
 {
-    if (Monster && Player)
+    if (Monster.IsValid() && Player.IsValid())
     {
         FVector PlayerLocation = Player->GetActorLocation();
         FVector MonsterLocation = Monster->GetActorLocation();
@@ -97,13 +104,8 @@ void UBTTask_StrafePlayer::StrafeAroundPlayer(APawn* Monster, APawn* Player, flo
         AP1CommonMonsterAIController* AIController = Cast<AP1CommonMonsterAIController>(Monster->GetController());
         if (AIController)
         {
-            // AI가 NewLocation을 목표로 부드럽게 이동하도록 요청
             AIController->MoveToLocation(NewLocation, 0.0f);
         }
-
-        // 몬스터가 플레이어를 계속 바라보게 회전
-        FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(Monster->GetActorLocation(), PlayerLocation);
-        Monster->SetActorRotation(FRotator(0.0f, LookAtRotation.Yaw, 0.0f));
     }
     
 }
