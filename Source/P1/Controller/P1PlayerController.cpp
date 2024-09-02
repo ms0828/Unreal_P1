@@ -7,20 +7,17 @@
 #include "InputMappingContext.h"
 #include "Character/P1Player.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Character/P1Player.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/P1HUDWidget.h"
+#include "System/P1AssetManager.h"
+#include "Data/P1InputData.h"
+#include "P1GameplayTags.h"
+
 AP1PlayerController::AP1PlayerController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> DefaultIMCRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Data/Input/IMC_Player.IMC_Player'"));
-	if (DefaultIMCRef.Object)
-	{
-		InputMappingContext = DefaultIMCRef.Object;
-	}
-
 	static ConstructorHelpers::FClassFinder<UP1HUDWidget> HUDWidgetRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_P1HUD.WBP_P1HUD_C'"));
 	if (HUDWidgetRef.Succeeded())
 	{
@@ -32,9 +29,12 @@ void AP1PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	if (const UP1InputData* InputData = UP1AssetManager::GetAssetByName<UP1InputData>("InputData"))
 	{
-		Subsystem->AddMappingContext(InputMappingContext, 0);
+		if (auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(InputData->InputMappingContext, 0);
+		}
 	}
 
 	if (HUDWidgetClass)
@@ -65,17 +65,30 @@ void AP1PlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 	PossessedPawn = GetPawn();
 	
-	if (auto* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	if (const UP1InputData* InputData = UP1AssetManager::GetAssetByName<UP1InputData>("InputData"))
 	{
-		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
-		if (AP1Player* MyPlayer = Cast<AP1Player>(PossessedPawn))
+		if (auto* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 		{
-			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::Input_Move);
-			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::Released_Move);
-			EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::ProcessComboAttack);
-			EnhancedInputComponent->BindAction(RollingAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::ProcessRolling);
+			auto MoveAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Move);
+			auto TurnAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Turn);
+			auto AttackAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Attack);
+			auto RollingAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Rolling);
+
+			EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
+			if (AP1Player* MyPlayer = Cast<AP1Player>(PossessedPawn))
+			{
+				EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::Input_Move);
+				EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::Released_Move);
+				EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::ProcessComboAttack);
+				EnhancedInputComponent->BindAction(RollingAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::ProcessRolling);
+			}
 		}
 	}
+
+
+
+
+	
 }
 
 void AP1PlayerController::Input_Turn(const FInputActionValue& InputValue)

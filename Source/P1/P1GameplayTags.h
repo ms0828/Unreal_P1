@@ -7,5 +7,8 @@
 namespace P1GameplayTags
 {
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Action_Move);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Action_Turn);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Action_Rolling);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Action_Attack);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Montage_Begin);
 }

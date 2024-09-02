@@ -6,6 +6,8 @@
 #include "Character/P1Character.h"
 #include "P1Define.h"
 #include "Interface/P1AttackAnimationInterface.h"
+#include "Interface/P1PlayerItemInterface.h"
+
 #include "P1Player.generated.h"
 
 class USpringArmComponent;
@@ -13,8 +15,21 @@ class UCameraComponent;
 struct FInputActionValue;
 class AP1PlayerController;
 
+
+DECLARE_DELEGATE_OneParam(FOnTakeItemDelegate, class UP1ItemData*);
+
+USTRUCT(BlueprintType)
+struct FTakeItemDelegateWrapper
+{
+	GENERATED_BODY()
+	FTakeItemDelegateWrapper() {}
+	FTakeItemDelegateWrapper(const FOnTakeItemDelegate& InItemDelegate) : ItemDelegate(InItemDelegate) {}
+	FOnTakeItemDelegate ItemDelegate;
+};
+
+
 UCLASS()
-class P1_API AP1Player : public AP1Character, public IP1AttackAnimationInterface
+class P1_API AP1Player : public AP1Character, public IP1AttackAnimationInterface, public IP1PlayerItemInterface
 {
 	GENERATED_BODY()
 	
@@ -33,11 +48,12 @@ protected:
 	void RollingBegin(FVector Direction);
 	void RollingEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
 	virtual void AttackHitCheck() override;
+	
 
 public:
 	// ---ui
-	void SetupPlayerHpBarWidget();
 	void SetupHUDWidget(class UP1HUDWidget* InHUDWidget);
+	
 
 public:
 	void ProcessComboAttack();
@@ -77,5 +93,14 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite)
 	EPlayerState State = EPlayerState::None;
+
+
+//---item
+protected:
+	UPROPERTY()
+	TArray<FTakeItemDelegateWrapper> TakeItemActions;
+	
+	virtual void TakeItem(class UP1ItemData* InItemData) override;
+	virtual void DrinkPotion(class UP1ItemData* InItemData);
 
 };

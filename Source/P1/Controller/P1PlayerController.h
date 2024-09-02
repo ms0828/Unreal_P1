@@ -34,7 +34,7 @@ private:
 
 
 protected:
-	UPROPERTY(EditAnywhere, Category = Input)
+	/*UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<class UInputMappingContext> InputMappingContext;
 
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -50,7 +50,7 @@ protected:
 	TObjectPtr<class UInputAction> AttackAction;
 
 	UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputAction> RollingAction;
+	TObjectPtr<class UInputAction> RollingAction;*/
 
 	UPROPERTY()
 	TObjectPtr<class APawn> PossessedPawn;

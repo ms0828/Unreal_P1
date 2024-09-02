@@ -14,6 +14,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CharacterStat/P1CharacterStatComponent.h"
 #include "UI/P1HUDWidget.h"
+#include "Item/P1ItemData.h"
 
 
 AP1Player::AP1Player()
@@ -53,6 +54,9 @@ AP1Player::AP1Player()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
+
+	//Item Actions
+	TakeItemActions.Add(FTakeItemDelegateWrapper(FOnTakeItemDelegate::CreateUObject(this, &AP1Player::DrinkPotion)));
 }
 
 
@@ -168,7 +172,6 @@ void AP1Player::AttackHitCheck()
 		DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 0.5f);
 #endif
 }
-
 
 void AP1Player::Input_Move(const FInputActionValue& InputValue)
 {
@@ -357,4 +360,18 @@ EPlayerState AP1Player::GetPlayerState()
 void AP1Player::SetPlayerState(EPlayerState InState)
 {
 	this->State = InState;
+}
+
+
+void AP1Player::TakeItem(UP1ItemData* InItemData)
+{
+	if (InItemData)
+	{
+		TakeItemActions[(uint8)InItemData->Type].ItemDelegate.ExecuteIfBound(InItemData);
+	}
+}
+
+void AP1Player::DrinkPotion(UP1ItemData* InItemData)
+{
+	Stat->SetHp(Stat->GetCurrentHp() + 20);
 }
