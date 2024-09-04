@@ -8,6 +8,8 @@
 #include "Interface/P1AttackAnimationInterface.h"
 #include "P1CommonMonster.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnCommonMonsterDead);
+
 UCLASS()
 class P1_API AP1CommonMonster : public AP1Enemy, public IP1CommonMonsterAIInterface, public IP1AttackAnimationInterface
 {
@@ -36,6 +38,9 @@ public:
 	virtual void OnDead() override;
 	virtual void EnableRagdoll() override;
 	virtual void Disappear() override;
+
+public:
+	FOnCommonMonsterDead CommonMonsterDeadDelegate;
 
 public:
 	virtual float GetAIPatrolRadius() override;

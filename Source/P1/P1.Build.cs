@@ -21,6 +21,9 @@ public class P1 : ModuleRules
 			"NavigationSystem",
 			"AIModule",
 			"GameplayTasks",
+            "LevelSequence", 
+            "MovieScene",
+            "MovieSceneTracks"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

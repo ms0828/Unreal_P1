@@ -70,6 +70,9 @@ void AP1CommonMonster::OnDead()
 	{
 		return;
 	}
+
+    CommonMonsterDeadDelegate.Broadcast();
+
 	State = EEnemyState::Dead;
     GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
