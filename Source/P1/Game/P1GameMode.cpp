@@ -2,7 +2,7 @@
 
 
 #include "Game/P1GameMode.h"
-
+#include "Player/P1PlayerState.h"
 AP1GameMode::AP1GameMode()
 {
 	//DefaultPawnClass
@@ -17,5 +17,5 @@ AP1GameMode::AP1GameMode()
 		PlayerControllerClass = PlayerControllerClassRef.Class;
 	}
 		
-		
+	PlayerStateClass = AP1PlayerState::StaticClass();
 }

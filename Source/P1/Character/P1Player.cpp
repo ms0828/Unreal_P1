@@ -15,7 +15,9 @@
 #include "CharacterStat/P1CharacterStatComponent.h"
 #include "UI/P1HUDWidget.h"
 #include "Item/P1ItemData.h"
-
+#include "AbilitySystem/P1AbilitySystemComponent.h"
+#include "AbilitySystem/P1PlayerAttributeSet.h"
+#include "Player/P1PlayerState.h"
 
 AP1Player::AP1Player()
 {
@@ -66,17 +68,37 @@ void AP1Player::BeginPlay()
 
 }
 
+void AP1Player::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	InitAbilitySystem();
+}
+
+void AP1Player::InitAbilitySystem()
+{
+	Super::InitAbilitySystem();
+
+	AP1PlayerState* PS = GetPlayerState<AP1PlayerState>();
+	if (PS)
+	{
+		ASC = Cast<UP1AbilitySystemComponent>(PS->GetAbilitySystemComponent());
+		ASC->InitAbilityActorInfo(PS, this);
+
+		AttributeSet = PS->GetPlayerAttributeSet();
+	}
+
+}
+
 
 void AP1Player::SetupHUDWidget(UP1HUDWidget* InHUDWidget)
 {
 	if (InHUDWidget)
 	{
-		InHUDWidget->UpdateStat(Stat->GetBaseStat(), Stat->GetModifierStat());
-		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
+		InHUDWidget->InitHpBar(AttributeSet->GetMaxHp());
+		InHUDWidget->UpdateHpBar(AttributeSet->GetHp());
 
-		Stat->OnStatChanged.AddUObject(InHUDWidget, &UP1HUDWidget::UpdateStat);
-		Stat->OnHpChanged.AddUObject(InHUDWidget, &UP1HUDWidget::UpdateHpBar);
-		Stat->OnHpZero.AddUObject(this, &AP1Player::OnDead);
+		AttributeSet->OnHpChanged.AddUObject(InHUDWidget, &UP1HUDWidget::UpdateHpBar);
 	}
 }
 
@@ -86,10 +108,10 @@ USpringArmComponent* AP1Player::GetCameraBoom() const
 }
 
 
-void AP1Player::OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker)
+void AP1Player::OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker)
 {
-	Stat->ApplyDamage(Damage);
-	if (Stat->GetCurrentHp() == 0)
+	AttributeSet->ApplyDamage(Damage);
+	if (AttributeSet->GetHp() == 0)
 	{
 		OnDead();
 	}
@@ -146,9 +168,9 @@ void AP1Player::AttackHitCheck()
 	TArray<FHitResult> OutHitResults;
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
-	const float AttackRange = Stat->GetTotalStat().AttackRange;
-	const float AttackRadius = 150.0f;
-	const float AttackDamage = Stat->GetTotalStat().Attack;
+	const float AttackRange = AttributeSet->GetAttackRange();
+	const float AttackRadius = 130.0f;
+	const float AttackDamage = AttributeSet->GetBaseDamage();
 	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 	const FVector End = Start + GetActorForwardVector() * AttackRange;
 
@@ -159,7 +181,7 @@ void AP1Player::AttackHitCheck()
 		{
 			if (AP1Character* HitCharacter = Cast<AP1Character>(HitResult.GetActor()) )
 			{
-				HitCharacter->OnDamaged(FinalDamage, this);
+				HitCharacter->OnDamaged(AttributeSet->GetBaseDamage(), this);
 			}
 		}
 	}
@@ -175,7 +197,7 @@ void AP1Player::AttackHitCheck()
 
 void AP1Player::Input_Move(const FInputActionValue& InputValue)
 {
-	if (GetPlayerState() == EPlayerState::Rolling)
+	if (GetMyPlayerState() == EPlayerState::Rolling)
 	{
 		return;
 	}
@@ -205,7 +227,7 @@ void AP1Player::ProcessComboAttack()
 	{
 		return;
 	}
-	if (GetPlayerState() == EPlayerState::Rolling)
+	if (GetMyPlayerState() == EPlayerState::Rolling)
 	{
 		return;
 	}
@@ -298,7 +320,7 @@ void AP1Player::ProcessRolling()
 	{
 		return;
 	}
-	if (GetPlayerState() == EPlayerState::Rolling)
+	if (GetMyPlayerState() == EPlayerState::Rolling)
 	{
 		return;
 	}
@@ -352,7 +374,7 @@ void AP1Player::RollingEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
-EPlayerState AP1Player::GetPlayerState()
+EPlayerState AP1Player::GetMyPlayerState()
 {
 	return State;
 }
@@ -373,5 +395,5 @@ void AP1Player::TakeItem(UP1ItemData* InItemData)
 
 void AP1Player::DrinkPotion(UP1ItemData* InItemData)
 {
-	Stat->SetHp(Stat->GetCurrentHp() + 20);
+	AttributeSet->SetHp(FMath::Clamp(AttributeSet->GetHp() + 20, 0, AttributeSet->GetMaxHp()));
 }

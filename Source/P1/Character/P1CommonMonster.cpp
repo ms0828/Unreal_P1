@@ -8,6 +8,7 @@
 #include "AI/P1CommonMonsterAIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/P1Player.h"
+#include "AbilitySystem/P1EnemyAttributeSet.h"
 
 AP1CommonMonster::AP1CommonMonster()
 {
@@ -16,9 +17,14 @@ AP1CommonMonster::AP1CommonMonster()
 }
 
 
-void AP1CommonMonster::OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker)
+void AP1CommonMonster::OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker)
 {
+    float Hp = AttributeSet->GetHp();
+    float MaxHp = AttributeSet->GetMaxHp();
+
 	Hp = FMath::Clamp(Hp - Damage, 0, MaxHp);
+    AttributeSet->SetHp(Hp);
+
 	if (Hp == 0)
 	{
 		OnDead();
@@ -151,7 +157,7 @@ void AP1CommonMonster::AttackHitCheck()
         {
             if (AP1Player* HitCharacter = Cast<AP1Player>(HitResult.GetActor()))
             {
-                HitCharacter->OnDamaged(FinalDamage, this);
+                HitCharacter->OnDamaged(AttributeSet->GetBaseDamage(), this);
             }
         }
     }

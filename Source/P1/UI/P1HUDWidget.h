@@ -17,8 +17,9 @@ public:
 	UP1HUDWidget(const FObjectInitializer& ObjectInitializer);
 
 public:
+	void InitHpBar(float MaxHp);
 	void UpdateHpBar(float NewCurrentHp);
-	void UpdateStat(const FP1PlayerStat& BaseStat, const FP1PlayerStat& ModifierStat);
+
 
 protected:
 	virtual void NativeConstruct() override;
@@ -27,6 +28,5 @@ protected:
 	UPROPERTY()
 	TObjectPtr<class UP1PlayerHpBarWidget> PlayerHpBar;
 
-	UPROPERTY()
-	TObjectPtr<class UP1PlayerStatWidget> PlayerStat;
+
 };

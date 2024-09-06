@@ -12,17 +12,16 @@ UP1HUDWidget::UP1HUDWidget(const FObjectInitializer& ObjectInitializer) : Super(
 	
 }
 
+void UP1HUDWidget::InitHpBar(float MaxHp)
+{
+	PlayerHpBar->SetMaxHp(MaxHp);
+}
+
 void UP1HUDWidget::UpdateHpBar(float NewCurrentHp)
 {
 	PlayerHpBar->UpdateHpBar(NewCurrentHp);
 }
 
-void UP1HUDWidget::UpdateStat(const FP1PlayerStat& BaseStat, const FP1PlayerStat& ModifierStat)
-{
-	FP1PlayerStat TotalStat = BaseStat + ModifierStat;
-	PlayerHpBar->SetMaxHp(TotalStat.MaxHp);
-	PlayerStat->UpdateStat(BaseStat, ModifierStat);
-}
 
 void UP1HUDWidget::NativeConstruct()
 {
@@ -30,9 +29,6 @@ void UP1HUDWidget::NativeConstruct()
 
 	PlayerHpBar = Cast<UP1PlayerHpBarWidget>(GetWidgetFromName(TEXT("PlayerHpBarWidget")));
 	ensure(PlayerHpBar);
-
-	PlayerStat = Cast<UP1PlayerStatWidget>(GetWidgetFromName(TEXT("PlayerStatWidget")));
-	ensure(PlayerStat);
 	
 	AP1Player* Player = Cast<AP1Player>(GetOwningPlayerPawn());
 	if (Player)

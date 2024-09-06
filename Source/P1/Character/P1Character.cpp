@@ -6,15 +6,17 @@
 #include "Components/CapsuleComponent.h"
 #include "CharacterStat/P1CharacterStatComponent.h"
 #include "Physics/P1Collision.h"
+#include "AbilitySystem/P1AbilitySystemComponent.h"
 
 AP1Character::AP1Character()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_P1CAPSULE);
 
 	// Stat
-	Stat = CreateDefaultSubobject<UP1CharacterStatComponent>(TEXT("Stat"));
+	//Stat = CreateDefaultSubobject<UP1CharacterStatComponent>(TEXT("Stat"));
 
-	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_P1CAPSULE);
+
 }
 
 void AP1Character::BeginPlay()
@@ -38,7 +40,7 @@ void AP1Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 }
 
-void AP1Character::OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker)
+void AP1Character::OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker)
 {
 }
 
@@ -56,4 +58,14 @@ void AP1Character::EnableRagdoll()
 
 void AP1Character::Disappear()
 {
+}
+
+UAbilitySystemComponent* AP1Character::GetAbilitySystemComponent() const
+{
+	return ASC;
+}
+
+void AP1Character::InitAbilitySystem()
+{
+
 }

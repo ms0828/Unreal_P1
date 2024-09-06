@@ -34,7 +34,7 @@ protected:
 
 
 public:
-	virtual void OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker) override;
+	virtual void OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker) override;
 	virtual void OnDead() override;
 	virtual void EnableRagdoll() override;
 	virtual void Disappear() override;

@@ -24,6 +24,7 @@ protected:
 
 	void PlayBossSequence();
 
+	UFUNCTION()
 	void SpawnStageBoss();
 
 private:

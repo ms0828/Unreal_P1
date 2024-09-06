@@ -41,6 +41,12 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void InitAbilitySystem() override;
+
+
+
+protected:
 	void ComboAttackBegin();
 	void ComboAttackEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
 	void SetComboCheckTimer();
@@ -60,9 +66,9 @@ public:
 	void ProcessRolling();
 	void Input_Move(const FInputActionValue& InputValue);
 	void Released_Move(const FInputActionValue& InputValue);
-	EPlayerState GetPlayerState();
+	EPlayerState GetMyPlayerState();
 	void SetPlayerState(EPlayerState InState);
-	virtual void OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker) override;
+	virtual void OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker) override;
 	virtual void OnDead() override;
 
 protected:

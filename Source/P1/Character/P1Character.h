@@ -1,13 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameplayTagContainer.h"
+#include "AbilitySystemInterface.h"
 #include "P1Character.generated.h"
 
 UCLASS()
-class P1_API AP1Character : public ACharacter
+class P1_API AP1Character : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -21,11 +23,17 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void OnDamaged(int32 Damage, TObjectPtr<AP1Character> Attacker);
+	virtual void OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker);
 	virtual void OnDead();
 	virtual void HandleGameplayEvent(struct FGameplayTag EventTag);
 	virtual void EnableRagdoll();
 	virtual void Disappear();
+
+//GAS
+public:
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual void InitAbilitySystem();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> HitReactionMontage;
@@ -36,18 +44,27 @@ protected:
 	FTimerHandle DeadAnimationTimerHandle;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UP1CharacterStatComponent> Stat;
-
-
+	// ----> 두번째 스텟 구현 (스텟 컴포넌트를 만들어 따로 관리)
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UP1CharacterStatComponent> Stat;*/
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Hp = 100;
+	// ----> 첫번째 스텟 구현 (하드 코딩) (클래스에 멤버로 직접 선언하니 관리가 힘듬)
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//int32 Hp = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 MaxHp = 100;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//int32 MaxHp = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 FinalDamage = 20;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//int32 FinalDamage = 20;
+
+
+//GAS
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UP1AbilitySystemComponent> ASC;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UP1AttributeSet> AttributeSet;
 };

@@ -23,7 +23,9 @@ public class P1 : ModuleRules
 			"GameplayTasks",
             "LevelSequence", 
             "MovieScene",
-            "MovieSceneTracks"
+            "MovieSceneTracks",
+			"GameplayTasks",
+			"GameplayAbilities",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
