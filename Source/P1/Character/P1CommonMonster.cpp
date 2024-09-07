@@ -144,7 +144,7 @@ void AP1CommonMonster::AttackHitCheck()
     TArray<FHitResult> OutHitResults;
     FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
-    const float AttackRange = 70.0f;
+    const float AttackRange = 100.0f;
     const float AttackRadius = 70.0f;
     const float AttackDamage = 10.0f;
     const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
@@ -161,6 +161,14 @@ void AP1CommonMonster::AttackHitCheck()
             }
         }
     }
+
+#if ENABLE_DRAW_DEBUG
+    FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+    float CapsuleHalfHeight = AttackRange * 0.5f;
+    FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+    DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 0.5f);
+#endif
+
 }
 
 TObjectPtr<UAnimMontage> AP1CommonMonster::GetPatrollingMontage()

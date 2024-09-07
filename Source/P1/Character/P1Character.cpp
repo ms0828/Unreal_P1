@@ -4,7 +4,6 @@
 #include "Character/P1Character.h"
 #include "GameplayTagContainer.h"
 #include "Components/CapsuleComponent.h"
-#include "CharacterStat/P1CharacterStatComponent.h"
 #include "Physics/P1Collision.h"
 #include "AbilitySystem/P1AbilitySystemComponent.h"
 
@@ -12,10 +11,6 @@ AP1Character::AP1Character()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_P1CAPSULE);
-
-	// Stat
-	//Stat = CreateDefaultSubobject<UP1CharacterStatComponent>(TEXT("Stat"));
-
 
 }
 

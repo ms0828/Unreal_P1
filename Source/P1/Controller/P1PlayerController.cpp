@@ -15,6 +15,7 @@
 #include "System/P1AssetManager.h"
 #include "Data/P1InputData.h"
 #include "P1GameplayTags.h"
+#include "AbilitySystem/P1AbilitySystemComponent.h"
 
 AP1PlayerController::AP1PlayerController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -45,7 +46,6 @@ void AP1PlayerController::BeginPlay()
 			HUDWidget->AddToViewport();
 		}
 	}
-
 }
 
 
@@ -71,25 +71,40 @@ void AP1PlayerController::SetupInputComponent()
 		{
 			auto MoveAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Move);
 			auto TurnAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Turn);
-			auto AttackAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Attack);
-			auto RollingAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Rolling);
 
 			EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
 			if (AP1Player* MyPlayer = Cast<AP1Player>(PossessedPawn))
 			{
 				EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::Input_Move);
 				EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::Released_Move);
-				EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, MyPlayer, &AP1Player::ProcessComboAttack);
-				EnhancedInputComponent->BindAction(RollingAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::ProcessRolling);
 			}
 		}
 	}
 
-
-
-
-	
 }
+
+void AP1PlayerController::SetupGASInputComponent(UP1AbilitySystemComponent* ASC)
+{
+	if (IsValid(ASC))
+	{
+		UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
+		PossessedPawn = GetPawn();
+
+		if (const UP1InputData* InputData = UP1AssetManager::GetAssetByName<UP1InputData>("InputData"))
+		{
+			auto AttackAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Attack);
+			auto RollingAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Rolling);
+
+			if (AP1Player* MyPlayer = Cast<AP1Player>(PossessedPawn))
+			{
+				EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::GasInputPressed, 0);
+				EnhancedInputComponent->BindAction(RollingAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::GasInputPressed, 1);
+			}
+		}
+	}
+}
+
+
 
 void AP1PlayerController::Input_Turn(const FInputActionValue& InputValue)
 {

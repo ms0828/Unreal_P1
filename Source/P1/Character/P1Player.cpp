@@ -12,11 +12,11 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "CharacterStat/P1CharacterStatComponent.h"
 #include "UI/P1HUDWidget.h"
 #include "Item/P1ItemData.h"
 #include "AbilitySystem/P1AbilitySystemComponent.h"
 #include "AbilitySystem/P1PlayerAttributeSet.h"
+#include "AbilitySystem/Abilities/P1GameplayAbility.h"
 #include "Player/P1PlayerState.h"
 
 AP1Player::AP1Player()
@@ -86,6 +86,26 @@ void AP1Player::InitAbilitySystem()
 		ASC->InitAbilityActorInfo(PS, this);
 
 		AttributeSet = PS->GetPlayerAttributeSet();
+
+		for (const auto& StartAbility : StartAbilities)
+		{
+			FGameplayAbilitySpec StartSpec(StartAbility);
+			ASC->GiveAbility(StartSpec);
+		}
+
+		for (const auto& StartInputAbility : StartInputAbilities)
+		{
+			FGameplayAbilitySpec StartSpec(StartInputAbility.Value);
+			StartSpec.InputID = StartInputAbility.Key;
+			ASC->GiveAbility(StartSpec);
+		}
+
+		AP1PlayerController* P1Controller = GetController<AP1PlayerController>();
+		if (P1Controller && ASC)
+		{
+			P1Controller->SetupGASInputComponent(ASC);
+		}
+
 	}
 
 }
@@ -117,6 +137,8 @@ void AP1Player::OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker)
 	}
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	AnimInstance->Montage_Stop(1.0f);
 	if (HitReactionMontage)
 	{
 		// Convert Yaw -> -180 to 180
@@ -161,6 +183,21 @@ void AP1Player::OnDead()
 		return;
 	}
 	State = EPlayerState::Dead;
+}
+
+UP1ComboAttackData* AP1Player::GetComboAttackData()
+{
+	return ComboAttackData;
+}
+
+UAnimMontage* AP1Player::GetComboAttackMontage()
+{
+	return ComboAttackMontage;
+}
+
+UAnimMontage* AP1Player::GetRollingMontage()
+{
+	return RollingMontage;
 }
 
 void AP1Player::AttackHitCheck()
@@ -221,159 +258,6 @@ void AP1Player::Released_Move(const FInputActionValue& InputValue)
 
 
 
-void AP1Player::ProcessComboAttack()
-{
-	if (GetCharacterMovement()->IsFalling())
-	{
-		return;
-	}
-	if (GetMyPlayerState() == EPlayerState::Rolling)
-	{
-		return;
-	}
-	if (PlayerController == nullptr)
-	{
-		PlayerController = Cast<AP1PlayerController>(GetController());
-	}
-
-	if (CurrentCombo == 0)
-	{
-		FRotator ControllerRotation = PlayerController->GetControlRotation();
-		ControllerRotation.Pitch = 0;
-		ControllerRotation.Roll = 0;
-		SetActorRotation(ControllerRotation);
-
-		ComboAttackBegin();
-		return;
-	}
-
-	if (!ComboTimerHandle.IsValid())
-	{
-		HasNextComboAttack = false;
-	}
-	else
-	{
-		HasNextComboAttack = true;
-	}
-}
-
-
-void AP1Player::ComboAttackBegin()
-{
-	CurrentCombo = 1;
-	
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	AnimInstance->Montage_Play(ComboAttackMontage, AttackSpeedRate);
-
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &AP1Player::ComboAttackEnd);
-	AnimInstance->Montage_SetEndDelegate(EndDelegate, ComboAttackMontage);
-
-	ComboTimerHandle.Invalidate();
-	SetComboCheckTimer();
-}
-
-void AP1Player::ComboAttackEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded)
-{
-	CurrentCombo = 0;
-
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-}
-
-void AP1Player::SetComboCheckTimer()
-{
-	int32 ComboIndex = CurrentCombo - 1;
-	ensure(ComboAttackData->EffectiveFrameCount.IsValidIndex(ComboIndex));
-
-	float ComboEffectiveTime = (ComboAttackData->EffectiveFrameCount[ComboIndex] / ComboAttackData->FrameRate) / AttackSpeedRate;
-
-	if (ComboEffectiveTime > 0.0f)
-	{
-		GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &AP1Player::ComboCheck, ComboEffectiveTime, false);
-	}
-}
-
-void AP1Player::ComboCheck()
-{
-	ComboTimerHandle.Invalidate();	//init
-	if (HasNextComboAttack)
-	{
-		UAnimInstance* AnimInstace = GetMesh()->GetAnimInstance();
-
-		CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, ComboAttackData->MaxComboCount);
-		FName NextSection = *FString::Printf(TEXT("%s%d"), *ComboAttackData->MontageSectionNamePrefix, CurrentCombo);
-		AnimInstace->Montage_JumpToSection(NextSection, ComboAttackMontage);
-		SetComboCheckTimer();
-		HasNextComboAttack = false;
-	}
-}
-
-void AP1Player::ProcessRolling()
-{
-	if (PlayerController == nullptr)
-	{
-		PlayerController = Cast<AP1PlayerController>(GetController());
-	}
-	if (GetCharacterMovement()->IsFalling())
-	{
-		return;
-	}
-	if (GetMyPlayerState() == EPlayerState::Rolling)
-	{
-		return;
-	}
-	if (CurrentMoveInputDirection == FVector2D::ZeroVector)
-	{
-		return;
-	}
-
-
-	FRotator ControlRotation = PlayerController->GetControlRotation();
-	FRotator YawRotation(0.0f, ControlRotation.Yaw, 0.0f);
-
-	// 카메라 기준 앞쪽(Forward)과 오른쪽(Right) 벡터 계산
-	FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X); // X축 = 앞쪽
-	FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);   // Y축 = 오른쪽
-
-	// 입력 값을 기준으로 월드 좌표계 방향 벡터 계산
-	FVector MoveDirection = (ForwardDirection * CurrentMoveInputDirection.X) + (RightDirection * CurrentMoveInputDirection.Y);
-
-	// 이동 방향을 정규화
-	MoveDirection.Normalize();
-	FRotator TargetRotation = MoveDirection.Rotation();
-
-	SetActorRotation(TargetRotation);
-	RollingBegin(MoveDirection);
-}
-
-
-void AP1Player::RollingBegin(FVector Direction)
-{
-	SetPlayerState(EPlayerState::Rolling);
-	CurrentCombo = 0;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance->Montage_IsPlaying(ComboAttackMontage))
-	{
-		AnimInstance->Montage_Stop(0.2f);
-	}
-	AnimInstance->Montage_Play(RollingMontage, RollingSpeedRate);
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &AP1Player::RollingEnd);
-	AnimInstance->Montage_SetEndDelegate(EndDelegate, RollingMontage);
-}
-
-void AP1Player::RollingEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
-{
-	CurrentCombo = 0;
-	SetPlayerState(EPlayerState::None);
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-}
-
 EPlayerState AP1Player::GetMyPlayerState()
 {
 	return State;
@@ -396,4 +280,37 @@ void AP1Player::TakeItem(UP1ItemData* InItemData)
 void AP1Player::DrinkPotion(UP1ItemData* InItemData)
 {
 	AttributeSet->SetHp(FMath::Clamp(AttributeSet->GetHp() + 20, 0, AttributeSet->GetMaxHp()));
+}
+
+
+
+void AP1Player::GasInputPressed(int32 InputId)
+{
+	FGameplayAbilitySpec* Spec = ASC->FindAbilitySpecFromInputID(InputId);
+	if (Spec)
+	{
+		Spec->InputPressed = true;
+		if (Spec->IsActive())
+		{
+			ASC->AbilitySpecInputPressed(*Spec);
+		}
+		else
+		{
+			ASC->TryActivateAbility(Spec->Handle);
+		}
+	}
+}
+
+void AP1Player::GasInputReleased(int32 InputId)
+{
+	FGameplayAbilitySpec* Spec = ASC->FindAbilitySpecFromInputID(InputId);
+	if (Spec)
+	{
+		Spec->InputPressed = false;
+		if (Spec->IsActive())
+		{
+			ASC->AbilitySpecInputReleased(*Spec);
+		}
+
+	}
 }

@@ -27,30 +27,15 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void OnPossess(APawn* InPawn) override;
-	//void SetCharacterControlData(const class UP1CharacterControlData* CharacterControlData);
+
+public:
+	void SetupGASInputComponent(class UP1AbilitySystemComponent* ASC);
 
 private:
 	void Input_Turn(const FInputActionValue& InputValue);
 
 
 protected:
-	/*UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputMappingContext> InputMappingContext;
-
-	UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputAction> MoveAction;
-	
-	UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputAction> TurnAction;
-
-	UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputAction> JumpAction;
-
-	UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputAction> AttackAction;
-
-	UPROPERTY(EditAnywhere, Category = Input)
-	TObjectPtr<class UInputAction> RollingAction;*/
 
 	UPROPERTY()
 	TObjectPtr<class APawn> PossessedPawn;

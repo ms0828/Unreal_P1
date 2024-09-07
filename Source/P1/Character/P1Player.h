@@ -47,12 +47,6 @@ protected:
 
 
 protected:
-	void ComboAttackBegin();
-	void ComboAttackEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
-	void SetComboCheckTimer();
-	void ComboCheck();
-	void RollingBegin(FVector Direction);
-	void RollingEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
 	virtual void AttackHitCheck() override;
 	
 
@@ -62,14 +56,16 @@ public:
 	
 
 public:
-	void ProcessComboAttack();
-	void ProcessRolling();
 	void Input_Move(const FInputActionValue& InputValue);
 	void Released_Move(const FInputActionValue& InputValue);
 	EPlayerState GetMyPlayerState();
 	void SetPlayerState(EPlayerState InState);
 	virtual void OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker) override;
 	virtual void OnDead() override;
+
+	class UP1ComboAttackData* GetComboAttackData();
+	class UAnimMontage* GetComboAttackMontage();
+	class UAnimMontage* GetRollingMontage();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
@@ -78,6 +74,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
 
+
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> ComboAttackMontage;
 
@@ -87,14 +85,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attackm, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UP1ComboAttackData> ComboAttackData;
 
+
 	const float AttackSpeedRate = 1.2f;
 	const float RollingSpeedRate = 1.0f;
-	int32 CurrentCombo = 0;		//'0' means combo do not start 
-	FTimerHandle ComboTimerHandle;
-	bool HasNextComboAttack = false;
-
 
 	AP1PlayerController* PlayerController;
+
+
+public:
 	FVector2D CurrentMoveInputDirection;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -109,4 +107,16 @@ protected:
 	virtual void TakeItem(class UP1ItemData* InItemData) override;
 	virtual void DrinkPotion(class UP1ItemData* InItemData);
 
+
+//Gas
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GAS)
+	TArray<TSubclassOf<class UP1GameplayAbility>> StartAbilities;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GAS)
+	TMap<int32, TSubclassOf<class UGameplayAbility>> StartInputAbilities;
+
+public:
+	void GasInputPressed(int32 InputId);
+	void GasInputReleased(int32 InputId);
 };
