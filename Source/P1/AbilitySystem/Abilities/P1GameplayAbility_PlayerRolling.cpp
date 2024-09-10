@@ -27,6 +27,8 @@ bool UP1GameplayAbility_PlayerRolling::CanActivateAbility(const FGameplayAbility
 
 void UP1GameplayAbility_PlayerRolling::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
 	AP1Player* Player = CastChecked<AP1Player>(ActorInfo->AvatarActor.Get());
 	Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 

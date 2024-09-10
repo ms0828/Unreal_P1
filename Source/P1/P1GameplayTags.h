@@ -18,4 +18,6 @@ namespace P1GameplayTags
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Player_Attack);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Player_Rolling);
+
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_AttackHitCheck);
 }
