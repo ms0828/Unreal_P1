@@ -7,6 +7,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Physics/P1Collision.h"
 #include "DrawDebugHelpers.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystem/P1AttributeSet.h"
+#include "AbilitySystemBlueprintLibrary.h"
 AP1TargetActor_Trace::AP1TargetActor_Trace()
 {
 
@@ -32,8 +35,21 @@ FGameplayAbilityTargetDataHandle AP1TargetActor_Trace::MakeTargetData() const
 {
 	ACharacter* Character = CastChecked<ACharacter>(SourceActor);
 
+	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(SourceActor);
+	if (!ASC)
+	{
+		return FGameplayAbilityTargetDataHandle();
+	}
+
+	const UP1AttributeSet* AttributeSet = ASC->GetSet<UP1AttributeSet>();
+	if (!AttributeSet)
+	{
+		return FGameplayAbilityTargetDataHandle();
+	}
+
+
 	TArray<FHitResult> OutHitResults;
-	const float AttackRange = 100.0f;
+	const float AttackRange = AttributeSet->GetAttackRange();
 	const float AttackRadius = 80.f;
 
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(UP1TargetActor_Trace), false, Character);

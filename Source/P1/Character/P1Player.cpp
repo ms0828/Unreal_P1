@@ -18,6 +18,8 @@
 #include "AbilitySystem/P1PlayerAttributeSet.h"
 #include "AbilitySystem/Abilities/P1GameplayAbility.h"
 #include "Player/P1PlayerState.h"
+#include "GameplayTagContainer.h"
+#include "P1GameplayTags.h"
 
 AP1Player::AP1Player()
 {
@@ -65,6 +67,9 @@ AP1Player::AP1Player()
 void AP1Player::BeginPlay()
 {
 	Super::BeginPlay();
+
+	FGameplayTag PlayerTag = P1GameplayTags::Character_Identity_Player;
+	GameplayTagContainer.AddTag(PlayerTag);
 
 }
 
@@ -115,10 +120,9 @@ void AP1Player::SetupHUDWidget(UP1HUDWidget* InHUDWidget)
 {
 	if (InHUDWidget)
 	{
+		InHUDWidget->SetAbilitySystemComponent(ASC);
 		InHUDWidget->InitHpBar(AttributeSet->GetMaxHp());
-		InHUDWidget->UpdateHpBar(AttributeSet->GetHp());
-
-		AttributeSet->OnHpChanged.AddUObject(InHUDWidget, &UP1HUDWidget::UpdateHpBar);
+		InHUDWidget->UpdateHpBar(AttributeSet->GetHp());	
 	}
 }
 
@@ -128,9 +132,9 @@ USpringArmComponent* AP1Player::GetCameraBoom() const
 }
 
 
-void AP1Player::OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker)
+void AP1Player::OnDamaged()
 {
-	AttributeSet->ApplyDamage(Damage);
+	
 	if (AttributeSet->GetHp() == 0)
 	{
 		OnDead();
@@ -141,37 +145,8 @@ void AP1Player::OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker)
 	AnimInstance->Montage_Stop(1.0f);
 	if (HitReactionMontage)
 	{
-		// Convert Yaw -> -180 to 180
-		float CharacterYaw = FMath::UnwindDegrees(GetActorRotation().Yaw);
-		float AttackerYaw = FMath::UnwindDegrees(Attacker->GetActorRotation().Yaw);
-		float YawDifference = AttackerYaw - CharacterYaw;
-
-		// Normalize yaw difference
-		if (YawDifference > 180.0f) YawDifference -= 360.0f;
-		if (YawDifference < -180.0f) YawDifference += 360.0f;
-
-		FName SectionName;
-
-
-		if (YawDifference > -45.0f && YawDifference < 45.0f)
-		{
-			SectionName = TEXT("Back");
-		}
-		else if (YawDifference > 135.0f || YawDifference < -135.0f)
-		{
-			SectionName = TEXT("Front");
-		}
-		else if (YawDifference > 45.0f && YawDifference < 135.0f)
-		{
-			SectionName = TEXT("Left");
-		}
-		else
-		{
-			SectionName = TEXT("Right");
-		}
-
 		AnimInstance->Montage_Play(HitReactionMontage, 1.0f);
-		AnimInstance->Montage_JumpToSection(SectionName, HitReactionMontage);
+		AnimInstance->Montage_JumpToSection(TEXT("Front"), HitReactionMontage);
 	}
 
 }
@@ -198,38 +173,6 @@ UAnimMontage* AP1Player::GetComboAttackMontage()
 UAnimMontage* AP1Player::GetRollingMontage()
 {
 	return RollingMontage;
-}
-
-void AP1Player::AttackHitCheck()
-{
-	TArray<FHitResult> OutHitResults;
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
-
-	const float AttackRange = AttributeSet->GetAttackRange();
-	const float AttackRadius = 130.0f;
-	const float AttackDamage = AttributeSet->GetBaseDamage();
-	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
-	const FVector End = Start + GetActorForwardVector() * AttackRange;
-
-	bool HitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_P1ACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
-	if (HitDetected)
-	{
-		for (FHitResult HitResult : OutHitResults)
-		{
-			if (AP1Character* HitCharacter = Cast<AP1Character>(HitResult.GetActor()) )
-			{
-				HitCharacter->OnDamaged(AttributeSet->GetBaseDamage(), this);
-			}
-		}
-	}
-
-
-#if ENABLE_DRAW_DEBUG
-		FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
-		float CapsuleHalfHeight = AttackRange * 0.5f;
-		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-		DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 0.5f);
-#endif
 }
 
 void AP1Player::Input_Move(const FInputActionValue& InputValue)
@@ -261,11 +204,6 @@ void AP1Player::Released_Move(const FInputActionValue& InputValue)
 EPlayerState AP1Player::GetMyPlayerState()
 {
 	return State;
-}
-
-void AP1Player::SetPlayerState(EPlayerState InState)
-{
-	this->State = InState;
 }
 
 

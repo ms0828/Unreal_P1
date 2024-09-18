@@ -4,6 +4,7 @@
 #include "Character/P1Enemy.h"
 #include "AbilitySystem/P1AbilitySystemComponent.h"
 #include "AbilitySystem/P1EnemyAttributeSet.h"
+#include "AbilitySystem/Abilities/P1GameplayAbility.h"
 
 AP1Enemy::AP1Enemy()
 {
@@ -29,7 +30,7 @@ void AP1Enemy::SetEnemyState(EEnemyState InState)
 	this->State = InState;
 }
 
-void AP1Enemy::OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker)
+void AP1Enemy::OnDamaged()
 {
 
 }
@@ -44,4 +45,10 @@ void AP1Enemy::InitAbilitySystem()
 	Super::InitAbilitySystem();
 
 	ASC->InitAbilityActorInfo(this, this);
+	
+	for (const auto& StartAbility : StartAbilities)
+	{
+		FGameplayAbilitySpec StartSpec(StartAbility);
+		ASC->GiveAbility(StartSpec);
+	}
 }

@@ -7,6 +7,7 @@
 
 UP1AnimNotify_AttackHitCheck_GAS::UP1AnimNotify_AttackHitCheck_GAS()
 {
+	ComboAttackLevel = 1.0f;
 	TriggerGameplayTag = P1GameplayTags::Character_Action_AttackHitCheck;
 }
 
@@ -25,7 +26,7 @@ void UP1AnimNotify_AttackHitCheck_GAS::Notify(USkeletalMeshComponent* MeshComp, 
 		if (OwnerActor)
 		{
 			FGameplayEventData PayloadData;
-
+			PayloadData.EventMagnitude = ComboAttackLevel;
 			// OwnerActor must have ASC
 			UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(OwnerActor, TriggerGameplayTag, PayloadData);
 		}

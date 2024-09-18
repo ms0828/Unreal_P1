@@ -9,6 +9,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Character/P1Player.h"
 #include "AbilitySystem/P1EnemyAttributeSet.h"
+#include "GameplayTagContainer.h"
+#include "P1GameplayTags.h"
 
 AP1CommonMonster::AP1CommonMonster()
 {
@@ -17,15 +19,17 @@ AP1CommonMonster::AP1CommonMonster()
 }
 
 
-void AP1CommonMonster::OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker)
+void AP1CommonMonster::BeginPlay()
 {
-    float Hp = AttributeSet->GetHp();
-    float MaxHp = AttributeSet->GetMaxHp();
+    Super::BeginPlay();
 
-	Hp = FMath::Clamp(Hp - Damage, 0, MaxHp);
-    AttributeSet->SetHp(Hp);
+    FGameplayTag CommonMonsterTag = P1GameplayTags::Character_Identity_CommonMonster;
+    GameplayTagContainer.AddTag(CommonMonsterTag);
+}
 
-	if (Hp == 0)
+void AP1CommonMonster::OnDamaged()
+{
+	if (AttributeSet->GetHp() == 0)
 	{
 		OnDead();
         return;
@@ -34,40 +38,11 @@ void AP1CommonMonster::OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (HitReactionMontage)
 	{
-        // Convert Yaw -> -180 to 180
-        float CharacterYaw = FMath::UnwindDegrees(GetActorRotation().Yaw);
-        float AttackerYaw = FMath::UnwindDegrees(Attacker->GetActorRotation().Yaw);
-        float YawDifference = AttackerYaw - CharacterYaw;
-
-        // Normalize yaw difference
-        if (YawDifference > 180.0f) YawDifference -= 360.0f;
-        if (YawDifference < -180.0f) YawDifference += 360.0f;
-
-        FName SectionName;
-        
-
-        if (YawDifference > -45.0f && YawDifference < 45.0f)
-        {
-            SectionName = TEXT("Back");
-        }
-        else if (YawDifference > 135.0f || YawDifference < -135.0f)
-        {
-            SectionName = TEXT("Front");
-        }
-        else if (YawDifference > 45.0f && YawDifference < 135.0f)
-        {
-            SectionName = TEXT("Left");
-        }
-        else
-        {
-            SectionName = TEXT("Right");
-        }
-
 		AnimInstance->Montage_Play(HitReactionMontage, 1.0f);
-		AnimInstance->Montage_JumpToSection(SectionName, HitReactionMontage);
+		AnimInstance->Montage_JumpToSection(TEXT("Front"), HitReactionMontage);
 	}
 	
-	D(FString::Printf(TEXT("%d"), Hp));
+	D(FString::Printf(TEXT("%d"), AttributeSet->GetHp()));
 }
 
 void AP1CommonMonster::OnDead()
@@ -139,37 +114,7 @@ void AP1CommonMonster::AttackByAI()
     GetWorld()->GetTimerManager().SetTimer(AttackFinishedHandle, this, &AP1CommonMonster::AttackFinished, AttackMontage->GetPlayLength(), false);
 }
 
-void AP1CommonMonster::AttackHitCheck()
-{
-    TArray<FHitResult> OutHitResults;
-    FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
-    const float AttackRange = 100.0f;
-    const float AttackRadius = 70.0f;
-    const float AttackDamage = 10.0f;
-    const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
-    const FVector End = Start + GetActorForwardVector() * AttackRange;
-
-    bool HitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, CCHANNEL_P1ACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
-    if (HitDetected)
-    {
-        for (FHitResult HitResult : OutHitResults)
-        {
-            if (AP1Player* HitCharacter = Cast<AP1Player>(HitResult.GetActor()))
-            {
-                HitCharacter->OnDamaged(AttributeSet->GetBaseDamage(), this);
-            }
-        }
-    }
-
-#if ENABLE_DRAW_DEBUG
-    FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
-    float CapsuleHalfHeight = AttackRange * 0.5f;
-    FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-    DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 0.5f);
-#endif
-
-}
 
 TObjectPtr<UAnimMontage> AP1CommonMonster::GetPatrollingMontage()
 {

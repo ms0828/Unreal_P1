@@ -2,24 +2,34 @@
 
 
 #include "UI/P1HUDWidget.h"
-#include "UI/P1PlayerStatWidget.h"
 #include "UI/P1PlayerHpBarWidget.h"
 #include "Character/P1Player.h"
-#include "Data/P1PlayerStat.h"
+#include "AbilitySystem/P1AbilitySystemComponent.h"
+#include "AbilitySystem/P1AttributeSet.h"
 
 UP1HUDWidget::UP1HUDWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	
 }
 
-void UP1HUDWidget::InitHpBar(float MaxHp)
+void UP1HUDWidget::InitHpBar(float NewMaxHp)
 {
-	PlayerHpBar->SetMaxHp(MaxHp);
+	PlayerHpBar->SetMaxHp(NewMaxHp);
 }
 
-void UP1HUDWidget::UpdateHpBar(float NewCurrentHp)
+void UP1HUDWidget::UpdateHpBar(float CurrentHp)
 {
-	PlayerHpBar->UpdateHpBar(NewCurrentHp);
+	PlayerHpBar->UpdateHpBar(CurrentHp);
+}
+
+void UP1HUDWidget::SetAbilitySystemComponent(TObjectPtr<UP1AbilitySystemComponent> NewASC)
+{
+	if (NewASC)
+	{
+		ASC = NewASC;
+		ASC->GetGameplayAttributeValueChangeDelegate(UP1AttributeSet::GetHpAttribute()).AddUObject(this, &UP1HUDWidget::OnHpChanged);
+		ASC->GetGameplayAttributeValueChangeDelegate(UP1AttributeSet::GetMaxHpAttribute()).AddUObject(this, &UP1HUDWidget::OnMaxHpChanged);
+	}
 }
 
 
@@ -35,4 +45,14 @@ void UP1HUDWidget::NativeConstruct()
 	{
 		Player->SetupHUDWidget(this);
 	}
+}
+
+void UP1HUDWidget::OnHpChanged(const FOnAttributeChangeData& ChangeData)
+{
+	UpdateHpBar(ChangeData.NewValue);
+}
+
+void UP1HUDWidget::OnMaxHpChanged(const FOnAttributeChangeData& ChangeData)
+{
+	InitHpBar(ChangeData.NewValue);
 }

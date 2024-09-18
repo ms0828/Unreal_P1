@@ -14,7 +14,7 @@
 	
 
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHpChangedDelegate);
 
 
 UCLASS()
@@ -27,7 +27,7 @@ public:
 
 
 public:
-	float ApplyDamage(float InDamage);
+	
 
 public:
 	ATTRIBUTE_ACCESSORS(ThisClass, Hp);
@@ -36,11 +36,13 @@ public:
 	ATTRIBUTE_ACCESSORS(ThisClass, AttackRange);
 	ATTRIBUTE_ACCESSORS(ThisClass, AttackSpeed);
 	ATTRIBUTE_ACCESSORS(ThisClass, MovementSpeed);
+	ATTRIBUTE_ACCESSORS(ThisClass, Damage);
 
+	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
 public:
-	FOnHpZeroDelegate OnHpZero;
-	FOnHpChangedDelegate OnHpChanged;
+	mutable FOnHpZeroDelegate OnHpZero;
+	mutable FOnHpChangedDelegate OnHpChanged;
 
 protected:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -60,5 +62,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FGameplayAttributeData MovementSpeed;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FGameplayAttributeData Damage;
 	
+	bool bOutOfHp = false;
+	
+
+	friend class UP1GE_AttackDamage;
 };

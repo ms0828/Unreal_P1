@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayTagContainer.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayTagContainer.h"
 #include "P1Character.generated.h"
 
 UCLASS()
@@ -20,10 +21,14 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker);
+
+	UFUNCTION()
+	virtual void OnDamaged();
+
 	virtual void OnDead();
 	virtual void HandleGameplayEvent(struct FGameplayTag EventTag);
 	virtual void EnableRagdoll();
@@ -68,4 +73,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = GAS)
 	TObjectPtr<class UP1AttributeSet> AttributeSet;
+
+	FGameplayTagContainer GameplayTagContainer;
 };

@@ -29,4 +29,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UP1PlayerAttributeSet> PlayerAttributeSet;
+
+	friend class UP1HUDWidget;
 };

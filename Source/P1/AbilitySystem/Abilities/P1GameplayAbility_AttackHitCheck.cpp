@@ -15,6 +15,8 @@ void UP1GameplayAbility_AttackHitCheck::ActivateAbility(const FGameplayAbilitySp
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
+	CurrentLevel = TriggerEventData->EventMagnitude;
+
 	UP1AbilityTask_Trace* AttackTraceTask = UP1AbilityTask_Trace::CreateTask(this, AP1TargetActor_Trace::StaticClass());
 	AttackTraceTask->OnComplete.AddDynamic(this, &UP1GameplayAbility_AttackHitCheck::OnTraceResultCallback);
 	AttackTraceTask->ReadyForActivation();
@@ -26,7 +28,13 @@ void UP1GameplayAbility_AttackHitCheck::OnTraceResultCallback(const FGameplayAbi
 	{
 		FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle, 0);
 
-		UE_LOG(LogTemp, Log, TEXT("Target %s Detected"), *(HitResult.GetActor()->GetName()));
+		//UE_LOG(LogTemp, Log, TEXT("Target %s Detected"), *(HitResult.GetActor()->GetName()));
+
+		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(AttackDamageEffect, CurrentLevel);
+		if (EffectSpecHandle.IsValid())
+		{
+			ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, TargetDataHandle);
+		}
 	}
 
 	bool bReplicatedEndAbility = true;

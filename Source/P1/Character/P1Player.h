@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Character/P1Character.h"
 #include "P1Define.h"
-#include "Interface/P1AttackAnimationInterface.h"
 #include "Interface/P1PlayerItemInterface.h"
 
 #include "P1Player.generated.h"
@@ -29,7 +28,7 @@ struct FTakeItemDelegateWrapper
 
 
 UCLASS()
-class P1_API AP1Player : public AP1Character, public IP1AttackAnimationInterface, public IP1PlayerItemInterface
+class P1_API AP1Player : public AP1Character, public IP1PlayerItemInterface
 {
 	GENERATED_BODY()
 	
@@ -46,10 +45,6 @@ protected:
 
 
 
-protected:
-	virtual void AttackHitCheck() override;
-	
-
 public:
 	// ---ui
 	void SetupHUDWidget(class UP1HUDWidget* InHUDWidget);
@@ -59,8 +54,7 @@ public:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Released_Move(const FInputActionValue& InputValue);
 	EPlayerState GetMyPlayerState();
-	void SetPlayerState(EPlayerState InState);
-	virtual void OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker) override;
+	virtual void OnDamaged() override;
 	virtual void OnDead() override;
 
 	class UP1ComboAttackData* GetComboAttackData();

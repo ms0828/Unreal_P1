@@ -13,11 +13,19 @@ namespace P1GameplayTags
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Montage_Begin);
 
+	//State
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_IsAttacking);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_IsRolling);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_IsDead);
 
+	//Ability
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Player_Attack);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Player_Rolling);
 
+	//Action
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_AttackHitCheck);
+
+	//Identity
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Identity_Player);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Identity_CommonMonster);
 }

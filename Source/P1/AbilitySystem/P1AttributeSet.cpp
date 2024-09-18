@@ -2,7 +2,8 @@
 
 #include "AbilitySystem/P1AttributeSet.h"
 #include "AbilitySystem/P1AbilitySystemComponent.h"
-
+#include "GameplayEffectExtension.h"
+#include "P1GameplayTags.h"
 UP1AttributeSet::UP1AttributeSet()
 {
 	InitMaxHp(100.f);
@@ -11,21 +12,28 @@ UP1AttributeSet::UP1AttributeSet()
 	InitAttackRange(70.f);
 	InitAttackSpeed(1.f);
 	InitMovementSpeed(500.f);
+	InitDamage(0.0f);
 }
 
-float UP1AttributeSet::ApplyDamage(float InDamage)
+
+void UP1AttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
-	const float ActualDamage = FMath::Clamp(InDamage, 0, InDamage);
-	const float AfterHp = FMath::Clamp(GetHp() - ActualDamage, 0, GetMaxHp());
+	Super::PostGameplayEffectExecute(Data);
 
-	SetHp(AfterHp);
-	OnHpChanged.Broadcast(GetHp());
+	float MinimumHealth = 0.0f;
 
-	if (GetHp() <= KINDA_SMALL_NUMBER)
+	if (Data.EvaluatedData.Attribute == GetDamageAttribute())
 	{
-		OnHpZero.Broadcast();
+		SetHp(FMath::Clamp(GetHp() - GetDamage(), MinimumHealth, GetMaxHp()));
+		OnHpChanged.Broadcast();
+		SetDamage(0.0f);
+		UE_LOG(LogTemp, Log, TEXT("%lf"), GetHp());
 	}
 
-	return ActualDamage;
-}
+	if (GetHp() <= 0.0f && !bOutOfHp)
+	{
+		Data.Target.AddLooseGameplayTag(P1GameplayTags::Character_State_IsDead);
+		bOutOfHp = true;
+	}
 
+}

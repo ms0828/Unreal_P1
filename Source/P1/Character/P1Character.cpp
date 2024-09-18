@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Physics/P1Collision.h"
 #include "AbilitySystem/P1AbilitySystemComponent.h"
+#include "AbilitySystem/P1EnemyAttributeSet.h"
 
 AP1Character::AP1Character()
 {
@@ -17,9 +18,8 @@ AP1Character::AP1Character()
 void AP1Character::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	AttributeSet->OnHpChanged.AddDynamic(this, &ThisClass::OnDamaged);
 }
-
 
 
 void AP1Character::Tick(float DeltaTime)
@@ -35,7 +35,7 @@ void AP1Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 }
 
-void AP1Character::OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker)
+void AP1Character::OnDamaged()
 {
 }
 

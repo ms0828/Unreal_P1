@@ -24,7 +24,7 @@ protected:
 public:
 	EEnemyState GetEnemyState();
 	void SetEnemyState(EEnemyState InState);
-	virtual void OnDamaged(float Damage, TObjectPtr<AP1Character> Attacker) override;
+	virtual void OnDamaged() override;
 	virtual void OnDead() override;
 
 //GAS
@@ -35,4 +35,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	EEnemyState State = EEnemyState::None;
 
+
+	//Gas
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GAS)
+	TArray<TSubclassOf<class UP1GameplayAbility>> StartAbilities;
 };

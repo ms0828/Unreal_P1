@@ -4,10 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "P1PlayerStat.h"
 #include "P1GameSingleton.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogP1Singleton, Error, All);
 
 UCLASS()
 class P1_API UP1GameSingleton : public UObject
@@ -19,14 +17,6 @@ public:
 	static UP1GameSingleton& Get();
 
 public:
-	FORCEINLINE FP1PlayerStat GetPlayerStat(int32 InLevel) const {
-		return PlayerStatTable.IsValidIndex(InLevel - 1) ? PlayerStatTable
-			[InLevel - 1] : FP1PlayerStat();
-	};
 
-	UPROPERTY()
-	int32 PlayerMaxLevel;
 
-private:
-	TArray<FP1PlayerStat> PlayerStatTable;
 };
