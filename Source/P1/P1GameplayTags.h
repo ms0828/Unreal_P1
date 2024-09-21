@@ -21,11 +21,13 @@ namespace P1GameplayTags
 	//Ability
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Player_Attack);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Player_Rolling);
-
-	//Action
-	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_AttackHitCheck);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Action_AttackHitCheck);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Enemy_Attack);
 
 	//Identity
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Identity_Player);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Identity_CommonMonster);
+
+	//AI
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(AI_Enemy_AttackWaiting);
 }

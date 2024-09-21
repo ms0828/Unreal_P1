@@ -40,6 +40,11 @@ void AP1Enemy::OnDead()
 
 }
 
+TObjectPtr<class UAnimMontage> AP1Enemy::GetAttackMontage()
+{
+	return AttackMontage;
+}
+
 void AP1Enemy::InitAbilitySystem()
 {
 	Super::InitAbilitySystem();
@@ -48,7 +53,8 @@ void AP1Enemy::InitAbilitySystem()
 	
 	for (const auto& StartAbility : StartAbilities)
 	{
-		FGameplayAbilitySpec StartSpec(StartAbility);
+		FGameplayAbilitySpec StartSpec(StartAbility.Ability);
+		AbilitySpecMap.Add(StartAbility.Tag, StartSpec);
 		ASC->GiveAbility(StartSpec);
 	}
 }

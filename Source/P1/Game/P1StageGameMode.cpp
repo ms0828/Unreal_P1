@@ -15,7 +15,7 @@ AP1StageGameMode::AP1StageGameMode() : Super()
 		MonsterClass = CommonMonsterClassRef.Class;
 	}
 
-    static ConstructorHelpers::FClassFinder<AP1StageBoss> StageBossClassRef(TEXT(""));
+    static ConstructorHelpers::FClassFinder<AP1StageBoss> StageBossClassRef(TEXT("/Script/Engine.Blueprint'/Game/Blueprints/BP_StageBoss.BP_StageBoss_C'"));
     if (StageBossClassRef.Class)
     {
         StageBossClass = StageBossClassRef.Class;
@@ -58,13 +58,10 @@ void AP1StageGameMode::OnCommonMonsterKilled()
 {
     MonsterCount--;
 
-    UE_LOG(LogTemp, Warning, TEXT("Monster Count : %d"), MonsterCount);
-
     if (MonsterCount == 0)
     {
         PlayBossSequence();
     }
-
 }
 
 void AP1StageGameMode::PlayBossSequence()

@@ -3,3 +3,7 @@
 
 #include "Character/P1StageBoss.h"
 
+AP1StageBoss::AP1StageBoss()
+{
+
+}

@@ -94,7 +94,8 @@ void AP1Player::InitAbilitySystem()
 
 		for (const auto& StartAbility : StartAbilities)
 		{
-			FGameplayAbilitySpec StartSpec(StartAbility);
+			FGameplayAbilitySpec StartSpec(StartAbility.Ability);
+			AbilitySpecMap.Add(StartAbility.Tag, StartSpec);
 			ASC->GiveAbility(StartSpec);
 		}
 

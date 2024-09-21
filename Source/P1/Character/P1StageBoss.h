@@ -12,4 +12,7 @@ class P1_API AP1StageBoss : public AP1Enemy
 {
 	GENERATED_BODY()
 	
+public:
+	AP1StageBoss();
+
 };

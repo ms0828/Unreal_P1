@@ -9,7 +9,7 @@ UP1AttributeSet::UP1AttributeSet()
 	InitMaxHp(100.f);
 	InitHp(GetMaxHp());
 	InitBaseDamage(20.f);
-	InitAttackRange(70.f);
+	InitAttackRange(100.f);
 	InitAttackSpeed(1.f);
 	InitMovementSpeed(500.f);
 	InitDamage(0.0f);

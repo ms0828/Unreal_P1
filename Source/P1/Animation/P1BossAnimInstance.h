@@ -4,21 +4,25 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "P1CommonMonsterAnimInstance.generated.h"
+#include "P1BossAnimInstance.generated.h"
 
-
+/**
+ * 
+ */
 UCLASS()
-class P1_API UP1CommonMonsterAnimInstance : public UAnimInstance
+class P1_API UP1BossAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 	
+
 public:
-	UP1CommonMonsterAnimInstance();
+	UP1BossAnimInstance();
 
 protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class ACharacter> Owner;
 
@@ -40,10 +44,4 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 bIsFalling : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
-	uint8 bIsStrafePlayer : 1;
-
-
-public:
-	void SetStrafePlayerMode(bool InValue);
 };

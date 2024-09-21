@@ -18,8 +18,6 @@ public:
 	AP1CommonMonster();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
-	TObjectPtr<class UAnimMontage> AttackMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> PatrollingMontage;

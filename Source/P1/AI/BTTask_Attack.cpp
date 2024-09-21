@@ -2,33 +2,54 @@
 
 
 #include "AI/BTTask_Attack.h"
-#include "P1AI.h"
 #include "AIController.h"
-#include "Interface/P1CommonMonsterAIInterface.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Character/P1Enemy.h"
+#include "GameplayAbilities/Public/AbilitySystemComponent.h"
+#include "AbilitySystem/Abilities/P1GameplayAbility_EnemyAttack.h"
+#include "P1GameplayTags.h"
 
 UBTTask_Attack::UBTTask_Attack()
 {
-
+	Tag = P1GameplayTags::AI_Enemy_AttackWaiting;
+	CoolTime = 5.0f;
 }
+
+
 
 EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
+	OwnerCompCashed = &OwnerComp;
 
-	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
-	if (ControllingPawn == nullptr)
+	AP1Enemy* Enemy = CastChecked<AP1Enemy>(OwnerComp.GetAIOwner()->GetPawn());
+	if (Enemy == nullptr)
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	IP1CommonMonsterAIInterface* AIPawn = Cast<IP1CommonMonsterAIInterface>(ControllingPawn);
-
-	if (AIPawn == nullptr)
+	UAbilitySystemComponent* ASC = Enemy->GetAbilitySystemComponent();
+	if (ASC)
 	{
-		return EBTNodeResult::Failed;
+		if (ASC->HasMatchingGameplayTag(P1GameplayTags::AI_Enemy_AttackWaiting))
+		{
+			return EBTNodeResult::Succeeded;
+		}
+
+		FGameplayAbilitySpec* Spec = Enemy->AbilitySpecMap.Find(P1GameplayTags::Ability_Enemy_Attack);
+		if (Spec)
+		{
+			ASC->TryActivateAbility(Spec->Handle);
+		}
+		ASC->AddLooseGameplayTag(P1GameplayTags::AI_Enemy_AttackWaiting);
 	}
 
-	AIPawn->AttackByAI();
+
+	AttackCoolTimerHandle.Invalidate();
+	GetWorld()->GetTimerManager().SetTimer(AttackCoolTimerHandle, [ASC]() {
+			ASC->RemoveLooseGameplayTag(P1GameplayTags::AI_Enemy_AttackWaiting);
+		}, CoolTime, false);
+
 	return EBTNodeResult::Succeeded;
 }
+

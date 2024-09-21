@@ -6,8 +6,23 @@
 #include "GameFramework/Character.h"
 #include "GameplayTagContainer.h"
 #include "AbilitySystemInterface.h"
-#include "GameplayTagContainer.h"
+#include "GameplayAbilitySpec.h"
 #include "P1Character.generated.h"
+
+
+USTRUCT(BlueprintType, Category = "GAS")
+struct FAbilityWithTag
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	FGameplayTag Tag;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UP1GameplayAbility> Ability;
+};
+
 
 UCLASS()
 class P1_API AP1Character : public ACharacter, public IAbilitySystemInterface
@@ -71,8 +86,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = GAS)
 	TObjectPtr<class UP1AbilitySystemComponent> ASC;
 
+	UPROPERTY(EditAnywhere, Category = GAS)
+	TArray<FAbilityWithTag> StartAbilities;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = GAS)
 	TObjectPtr<class UP1AttributeSet> AttributeSet;
 
 	FGameplayTagContainer GameplayTagContainer;
+
+public:
+	TMap<FGameplayTag, FGameplayAbilitySpec> AbilitySpecMap;
 };

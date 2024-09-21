@@ -7,9 +7,7 @@
 #include "P1Define.h"
 #include "P1Enemy.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class P1_API AP1Enemy : public AP1Character
 {
@@ -26,18 +24,19 @@ public:
 	void SetEnemyState(EEnemyState InState);
 	virtual void OnDamaged() override;
 	virtual void OnDead() override;
-
-//GAS
-public:
-	virtual void InitAbilitySystem() override;
+	TObjectPtr<class UAnimMontage> GetAttackMontage();
 
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	EEnemyState State = EEnemyState::None;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> AttackMontage;
 
-	//Gas
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GAS)
-	TArray<TSubclassOf<class UP1GameplayAbility>> StartAbilities;
+
+
+//GAS
+public:
+	virtual void InitAbilitySystem() override;
+
 };

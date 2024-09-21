@@ -5,7 +5,9 @@
 #include "P1AI.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Interface/P1CommonMonsterAIInterface.h"
+#include "AbilitySystem/P1AttributeSet.h"
+#include "AbilitySystem/P1AbilitySystemComponent.h"
+#include "Character/P1Character.h"
 
 UBTDecorator_AttackInRange::UBTDecorator_AttackInRange()
 {
@@ -16,14 +18,20 @@ bool UBTDecorator_AttackInRange::CalculateRawConditionValue(UBehaviorTreeCompone
 {
 	bool bResult = Super::CalculateRawConditionValue(OwnerComp, NodeMemory);
 
-	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
+	AP1Character* ControllingPawn = Cast<AP1Character>(OwnerComp.GetAIOwner()->GetPawn());
 	if (ControllingPawn == nullptr)
 	{
 		return false;
 	}
 
-	IP1CommonMonsterAIInterface* AIPawn = Cast<IP1CommonMonsterAIInterface>(ControllingPawn);
-	if (AIPawn == nullptr)
+	UP1AbilitySystemComponent* ASC = Cast<UP1AbilitySystemComponent>(ControllingPawn->GetAbilitySystemComponent());
+	if (ASC == nullptr)
+	{
+		return false;
+	}
+
+	const UP1AttributeSet* AttributeSet = ASC->GetSet<UP1AttributeSet>();
+	if (AttributeSet == nullptr)
 	{
 		return false;
 	}
@@ -35,7 +43,7 @@ bool UBTDecorator_AttackInRange::CalculateRawConditionValue(UBehaviorTreeCompone
 	}
 
 	float DistanceToTarget = ControllingPawn->GetDistanceTo(Target);
-	float AttackRangeRadius = AIPawn->GetAIAttackRange();
+	float AttackRangeRadius = AttributeSet->GetAttackRange();
 	bResult = (DistanceToTarget <= AttackRangeRadius);
 
 	return bResult;

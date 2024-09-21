@@ -16,10 +16,13 @@ namespace P1GameplayTags
 
 	UE_DEFINE_GAMEPLAY_TAG(Ability_Player_Attack, "Ability.Player.Attack");
 	UE_DEFINE_GAMEPLAY_TAG(Ability_Player_Rolling, "Ability.Player.Rolling");
-	
-	UE_DEFINE_GAMEPLAY_TAG(Character_Action_AttackHitCheck, "Character.Action.AttackHitCheck");
+	UE_DEFINE_GAMEPLAY_TAG(Ability_Action_AttackHitCheck, "Ability.Action.AttackHitCheck");
+	UE_DEFINE_GAMEPLAY_TAG(Ability_Enemy_Attack, "Ability.Enemy.Attack");
 
 
 	UE_DEFINE_GAMEPLAY_TAG(Character_Identity_Player, "Character.Identity.Player");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Identity_CommonMonster, "Character.Identity.CommonMonster");
+
+	//AI
+	UE_DEFINE_GAMEPLAY_TAG(AI_Enemy_AttackWaiting, "AI.Enemy.AttackWaiting");
 }

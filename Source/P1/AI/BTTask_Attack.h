@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
+#include "GameplayTagContainer.h"
 #include "BTTask_Attack.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class P1_API UBTTask_Attack : public UBTTaskNode
 {
@@ -16,7 +15,18 @@ class P1_API UBTTask_Attack : public UBTTaskNode
 	
 public:
 	UBTTask_Attack();
+
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
+protected:
+	TObjectPtr<class UBehaviorTreeComponent> OwnerCompCashed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTag Tag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CoolTime;
+
+	FTimerHandle AttackCoolTimerHandle;
 };

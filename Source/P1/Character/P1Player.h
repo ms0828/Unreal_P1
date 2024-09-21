@@ -105,9 +105,6 @@ protected:
 //Gas
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GAS)
-	TArray<TSubclassOf<class UP1GameplayAbility>> StartAbilities;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GAS)
 	TMap<int32, TSubclassOf<class UGameplayAbility>> StartInputAbilities;
 
 public:

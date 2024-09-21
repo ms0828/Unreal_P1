@@ -8,7 +8,7 @@
 UP1AnimNotify_AttackHitCheck_GAS::UP1AnimNotify_AttackHitCheck_GAS()
 {
 	ComboAttackLevel = 1.0f;
-	TriggerGameplayTag = P1GameplayTags::Character_Action_AttackHitCheck;
+	TriggerGameplayTag = P1GameplayTags::Ability_Action_AttackHitCheck;
 }
 
 FString UP1AnimNotify_AttackHitCheck_GAS::GetNotifyName_Implementation() const
