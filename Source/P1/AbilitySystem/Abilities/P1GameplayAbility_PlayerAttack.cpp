@@ -6,6 +6,8 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Data/P1ComboAttackData.h"
+#include "AbilitySystemComponent.h"
+#include "P1GameplayTags.h"
 
 UP1GameplayAbility_PlayerAttack::UP1GameplayAbility_PlayerAttack()
 {
@@ -32,10 +34,14 @@ void UP1GameplayAbility_PlayerAttack::EndAbility(const FGameplayAbilitySpecHandl
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
 	AP1Player* Player = CastChecked<AP1Player>(ActorInfo->AvatarActor.Get());
-	Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	if (!Player->GetAbilitySystemComponent()->HasMatchingGameplayTag(P1GameplayTags::Character_State_IsSmashing))
+	{
+		Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	}
+	CurrentCombo = 0;
+	Player->SetCurrentCombo(CurrentCombo);
 
 	ComboAttackData = nullptr;
-	CurrentCombo = 0;
 	HasNextComboInput = false;
 }
 
@@ -71,6 +77,8 @@ void UP1GameplayAbility_PlayerAttack::OnInterruptedCallback()
 FName UP1GameplayAbility_PlayerAttack::GetNextSection()
 {
 	CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, ComboAttackData->MaxComboCount);
+	AP1Player* Player = CastChecked<AP1Player>(CurrentActorInfo->AvatarActor.Get());
+	Player->SetCurrentCombo(CurrentCombo);
 	FName NextSection = *FString::Printf(TEXT("%s%d"), *ComboAttackData->MontageSectionNamePrefix, CurrentCombo);
 	return NextSection;
 }
@@ -85,7 +93,6 @@ void UP1GameplayAbility_PlayerAttack::StartComboTimer()
 	{
 		GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &UP1GameplayAbility_PlayerAttack::CheckComboInput, ComboEffectiveTime, false);
 	}
-
 }
 
 void UP1GameplayAbility_PlayerAttack::CheckComboInput()
@@ -98,3 +105,5 @@ void UP1GameplayAbility_PlayerAttack::CheckComboInput()
 		HasNextComboInput = false;
 	}
 }
+
+

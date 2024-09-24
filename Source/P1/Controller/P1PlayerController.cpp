@@ -94,11 +94,13 @@ void AP1PlayerController::SetupGASInputComponent(UP1AbilitySystemComponent* ASC)
 		{
 			auto AttackAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Attack);
 			auto RollingAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Rolling);
+			auto SmashAction = InputData->FindInputActionByTag(P1GameplayTags::Input_Action_Smash);
 
 			if (AP1Player* MyPlayer = Cast<AP1Player>(PossessedPawn))
 			{
 				EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::GasInputPressed, 0);
 				EnhancedInputComponent->BindAction(RollingAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::GasInputPressed, 1);
+				EnhancedInputComponent->BindAction(SmashAction, ETriggerEvent::Triggered, MyPlayer, &AP1Player::GasInputPressed, 2);
 			}
 		}
 	}

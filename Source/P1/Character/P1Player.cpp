@@ -176,6 +176,21 @@ UAnimMontage* AP1Player::GetRollingMontage()
 	return RollingMontage;
 }
 
+UAnimMontage* AP1Player::GetSmashMontage()
+{
+	return SmashMontage;
+}
+
+uint8 AP1Player::GetCurrentCombo()
+{
+	return CurrentCombo;
+}
+
+void AP1Player::SetCurrentCombo(uint8 ComboIndex)
+{
+	CurrentCombo = ComboIndex;
+}
+
 void AP1Player::Input_Move(const FInputActionValue& InputValue)
 {
 	if (GetMyPlayerState() == EPlayerState::Rolling)

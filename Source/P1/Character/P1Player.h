@@ -44,9 +44,8 @@ protected:
 	virtual void InitAbilitySystem() override;
 
 
-
-public:
 	// ---ui
+public:
 	void SetupHUDWidget(class UP1HUDWidget* InHUDWidget);
 	
 
@@ -60,6 +59,9 @@ public:
 	class UP1ComboAttackData* GetComboAttackData();
 	class UAnimMontage* GetComboAttackMontage();
 	class UAnimMontage* GetRollingMontage();
+	class UAnimMontage* GetSmashMontage();
+	uint8 GetCurrentCombo();
+	void SetCurrentCombo(uint8 ComboIndex);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
@@ -69,6 +71,7 @@ protected:
 	TObjectPtr<UCameraComponent> FollowCamera;
 
 
+	//Animation
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> ComboAttackMontage;
@@ -76,12 +79,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> RollingMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> SmashMontage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attackm, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UP1ComboAttackData> ComboAttackData;
 
 
 	const float AttackSpeedRate = 1.2f;
 	const float RollingSpeedRate = 1.0f;
+	uint8 CurrentCombo = 0;
 
 	AP1PlayerController* PlayerController;
 
