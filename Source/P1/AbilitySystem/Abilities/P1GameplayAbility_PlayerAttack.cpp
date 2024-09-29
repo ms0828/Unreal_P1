@@ -19,12 +19,13 @@ void UP1GameplayAbility_PlayerAttack::ActivateAbility(const FGameplayAbilitySpec
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
 	AP1Player* Player = CastChecked<AP1Player>(ActorInfo->AvatarActor.Get());
-	Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+
 	ComboAttackData = Player->GetComboAttackData();
 	UAbilityTask_PlayMontageAndWait* PlayAttackTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, TEXT("PlayAttack"), Player->GetComboAttackMontage(), 1.0f, GetNextSection());
 	PlayAttackTask->OnCompleted.AddDynamic(this, &UP1GameplayAbility_PlayerAttack::OnCompletedCallback);
 	PlayAttackTask->OnInterrupted.AddDynamic(this, &UP1GameplayAbility_PlayerAttack::OnInterruptedCallback);
 	PlayAttackTask->OnCancelled.AddDynamic(this, &UP1GameplayAbility_PlayerAttack::OnInterruptedCallback);
+	PlayAttackTask->OnBlendOut.AddDynamic(this, &UP1GameplayAbility_PlayerAttack::OnInterruptedCallback);
 	PlayAttackTask->ReadyForActivation();
 	StartComboTimer();
 }
@@ -32,12 +33,9 @@ void UP1GameplayAbility_PlayerAttack::ActivateAbility(const FGameplayAbilitySpec
 void UP1GameplayAbility_PlayerAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-
+	
 	AP1Player* Player = CastChecked<AP1Player>(ActorInfo->AvatarActor.Get());
-	if (!Player->GetAbilitySystemComponent()->HasMatchingGameplayTag(P1GameplayTags::Character_State_IsSmashing))
-	{
-		Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-	}
+	
 	CurrentCombo = 0;
 	Player->SetCurrentCombo(CurrentCombo);
 

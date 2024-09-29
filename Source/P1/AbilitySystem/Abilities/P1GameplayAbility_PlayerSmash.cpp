@@ -3,6 +3,7 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Character/P1Player.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/Controller.h"
 
 UP1GameplayAbility_PlayerSmash::UP1GameplayAbility_PlayerSmash()
 {
@@ -15,11 +16,20 @@ void UP1GameplayAbility_PlayerSmash::ActivateAbility(const FGameplayAbilitySpecH
 
 	AP1Player* Player = CastChecked<AP1Player>(ActorInfo->AvatarActor.Get());
 	Player->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	AController* Controller = Player->GetController();
+	if (Controller)
+	{
+		FRotator ControlRotation = Controller->GetControlRotation();  
+		FRotator NewRotation(0.0f, ControlRotation.Yaw, 0.0f);  
+		Player->SetActorRotation(NewRotation);
+	}
+
 
 	UAbilityTask_PlayMontageAndWait* SmashAttackTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, TEXT("PlaySmash"), Player->GetSmashMontage(), 1.0f, GetNextSection());
 	SmashAttackTask->OnCompleted.AddDynamic(this, &UP1GameplayAbility_PlayerSmash::OnCompletedCallback);
 	SmashAttackTask->OnInterrupted.AddDynamic(this, &UP1GameplayAbility_PlayerSmash::OnInterruptedCallback);
 	SmashAttackTask->OnCancelled.AddDynamic(this, &UP1GameplayAbility_PlayerSmash::OnInterruptedCallback);
+	SmashAttackTask->OnBlendOut.AddDynamic(this, &UP1GameplayAbility_PlayerSmash::OnInterruptedCallback);
 	SmashAttackTask->ReadyForActivation();
 }
 

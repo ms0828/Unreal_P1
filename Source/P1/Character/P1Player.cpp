@@ -140,7 +140,7 @@ void AP1Player::OnDamaged()
 	{
 		OnDead();
 	}
-
+	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
 	AnimInstance->Montage_Stop(1.0f);
@@ -149,7 +149,7 @@ void AP1Player::OnDamaged()
 		AnimInstance->Montage_Play(HitReactionMontage, 1.0f);
 		AnimInstance->Montage_JumpToSection(TEXT("Front"), HitReactionMontage);
 	}
-
+	
 }
 
 void AP1Player::OnDead()
@@ -193,10 +193,6 @@ void AP1Player::SetCurrentCombo(uint8 ComboIndex)
 
 void AP1Player::Input_Move(const FInputActionValue& InputValue)
 {
-	if (GetMyPlayerState() == EPlayerState::Rolling)
-	{
-		return;
-	}
 
 	FVector2D MovementVector = InputValue.Get<FVector2D>();
 	CurrentMoveInputDirection = MovementVector;
