@@ -29,4 +29,9 @@ namespace P1GameplayTags
 
 	//AI
 	UE_DEFINE_GAMEPLAY_TAG(AI_Enemy_AttackWaiting, "AI.Enemy.AttackWaiting");
+
+
+	//SetByCaller Data
+	UE_DEFINE_GAMEPLAY_TAG(Data_Damage_Normal, "Data.Damage.Normal");
+	UE_DEFINE_GAMEPLAY_TAG(Data_Damage_Critical , "Data.Damage.Critical");
 }

@@ -40,7 +40,4 @@ protected:
 	UPROPERTY()
 	TArray<FVector> CommonMonsterSpawnLocations;
 
-
-	
-
 };

@@ -7,6 +7,7 @@
 #include "Runtime/LevelSequence/Public/LevelSequence.h"
 #include "Runtime/LevelSequence/Public/LevelSequencePlayer.h"
 #include "Runtime/MovieScene/Public/MovieSceneSequencePlaybackSettings.h"
+
 AP1StageGameMode::AP1StageGameMode() : Super()
 {
 	static ConstructorHelpers::FClassFinder<AP1CommonMonster> CommonMonsterClassRef(TEXT("/Script/Engine.Blueprint'/Game/Blueprints/BP_MonsterKhaimera.BP_MonsterKhaimera_C'"));

@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/Abilities/P1GameplayAbility.h"
+#include "GameplayTagContainer.h"
 #include "P1GameplayAbility_AttackHitCheck.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class P1_API UP1GameplayAbility_AttackHitCheck : public UP1GameplayAbility
 {
@@ -28,5 +27,9 @@ protected:
 	TSubclassOf<class UGameplayEffect> AttackDamageEffect;
 
 
-	float CurrentLevel;
+	TObjectPtr<class UCurveTable> DamageTable;
+	FSimpleCurve* DamageCurve;
+
+	FGameplayTag AbilityTag;
+	float ComboAttackLevel;
 };

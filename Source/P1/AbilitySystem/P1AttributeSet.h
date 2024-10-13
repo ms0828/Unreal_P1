@@ -32,12 +32,13 @@ public:
 public:
 	ATTRIBUTE_ACCESSORS(ThisClass, Hp);
 	ATTRIBUTE_ACCESSORS(ThisClass, MaxHp);
-	ATTRIBUTE_ACCESSORS(ThisClass, BaseDamage);
 	ATTRIBUTE_ACCESSORS(ThisClass, AttackRange);
 	ATTRIBUTE_ACCESSORS(ThisClass, AttackSpeed);
 	ATTRIBUTE_ACCESSORS(ThisClass, MovementSpeed);
+	ATTRIBUTE_ACCESSORS(ThisClass, AttackRate);
 	ATTRIBUTE_ACCESSORS(ThisClass, Damage);
 
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue);
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
 public:
@@ -52,9 +53,6 @@ protected:
 	FGameplayAttributeData MaxHp;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	FGameplayAttributeData BaseDamage;
-
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FGameplayAttributeData AttackRange;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -64,7 +62,11 @@ protected:
 	FGameplayAttributeData MovementSpeed;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FGameplayAttributeData AttackRate;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FGameplayAttributeData Damage;
+	
 	
 	bool bOutOfHp = false;
 	

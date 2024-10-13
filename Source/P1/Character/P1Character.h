@@ -63,22 +63,6 @@ protected:
 
 	FTimerHandle DeadAnimationTimerHandle;
 
-protected:
-	// ----> 두번째 스텟 구현 (스텟 컴포넌트를 만들어 따로 관리)
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UP1CharacterStatComponent> Stat;*/
-
-public:
-	// ----> 첫번째 스텟 구현 (하드 코딩) (클래스에 멤버로 직접 선언하니 관리가 힘듬)
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//int32 Hp = 100;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//int32 MaxHp = 100;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//int32 FinalDamage = 20;
-
 
 
 //GAS

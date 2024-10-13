@@ -26,6 +26,10 @@ protected:
 	UPROPERTY()
 	FGameplayTag TriggerGameplayTag;
 	
+
+	UPROPERTY(EditAnywhere)
+	FGameplayTag AbilityTag;
+
 	UPROPERTY(EditAnywhere)
 	float ComboAttackLevel;
 

@@ -5,6 +5,11 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/Tasks/P1AbilityTask_Trace.h"
 #include "AbilitySystem/TargetActors/P1TargetActor_Trace.h"
+#include "P1GameplayTags.h"
+#include "Character/P1Character.h"
+#include "System/P1AssetManager.h"
+#include "AbilitySystem/P1AbilitySystemComponent.h"
+#include "AbilitySystem/P1AttributeSet.h"
 
 UP1GameplayAbility_AttackHitCheck::UP1GameplayAbility_AttackHitCheck()
 {
@@ -15,21 +20,36 @@ void UP1GameplayAbility_AttackHitCheck::ActivateAbility(const FGameplayAbilitySp
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	CurrentLevel = TriggerEventData->EventMagnitude;
-
+	ComboAttackLevel = TriggerEventData->EventMagnitude;
+	AbilityTag = TriggerEventData->InstigatorTags.First();
+	DamageTable = UP1AssetManager::GetAssetByName<UCurveTable>("DamageTable");
+	DamageCurve = static_cast<FSimpleCurve*>(DamageTable->FindCurve(*AbilityTag.ToString(), TEXT("DamageTable Context")));
 	UP1AbilityTask_Trace* AttackTraceTask = UP1AbilityTask_Trace::CreateTask(this, AP1TargetActor_Trace::StaticClass());
 	AttackTraceTask->OnComplete.AddDynamic(this, &UP1GameplayAbility_AttackHitCheck::OnTraceResultCallback);
-	AttackTraceTask->ReadyForActivation();
-}
+	AttackTraceTask->ReadyForActivation();}
 
 void UP1GameplayAbility_AttackHitCheck::OnTraceResultCallback(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
 	if (UAbilitySystemBlueprintLibrary::TargetDataHasHitResult(TargetDataHandle, 0))
 	{
 		FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle, 0);
-
 		
-		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(AttackDamageEffect, CurrentLevel);
+		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(AttackDamageEffect, ComboAttackLevel);
+
+		float Coefficient = DamageCurve->Eval(ComboAttackLevel, 1);
+		
+		AP1Character* Character = Cast<AP1Character>(GetAvatarActorFromActorInfo());
+		UAbilitySystemComponent* ASC = Character->GetAbilitySystemComponent();
+		const UP1AttributeSet* AttributeSet = Cast<UP1AttributeSet>(ASC->GetAttributeSet(UP1AttributeSet::StaticClass()));
+		float AttackRate = AttributeSet->GetAttackRate();
+		float FinalValue = AttackRate * Coefficient;
+
+		// Todo
+		// - normal or cirtical
+		// not completed
+		EffectSpecHandle.Data->SetSetByCallerMagnitude(P1GameplayTags::Data_Damage_Normal, FinalValue);
+
+
 		if (EffectSpecHandle.IsValid())
 		{
 			ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, TargetDataHandle);
